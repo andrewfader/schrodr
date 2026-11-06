@@ -3,6 +3,12 @@ project(SCHRODR VERSION 0.1.0 LANGUAGES CXX)
 
 # Keep windows.h from defining the min/max macros no matter which header pulls it in.
 add_compile_definitions($<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>)
+# The tests and tools hold whole keyboards and engines (0.4 to 0.5 MB each) on the stack, as
+# Linux's and macOS's 8 MB stacks allow; Windows gives an executable 1 MB, so its programs get
+# 16 MB. The plug-in keeps its engine on the heap and is unaffected.
+if(MSVC)
+  string(APPEND CMAKE_EXE_LINKER_FLAGS " /STACK:16777216")
+endif()
 
 option(SCHRODR_COVERAGE "Instrument the tests for line coverage (GCC/Clang)" OFF)
 option(SCHRODR_EDITOR "Build the native editor" ON)
