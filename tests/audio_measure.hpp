@@ -229,12 +229,12 @@ inline double spectral_centroid(const Span& s, double rate, int order = 13) {
   return den > 0 ? num / den : 0.0;
 }
 
-// A tuner's reading: the strongest component within +-span cents of `near` (a Hann-windowed
+// A tuner's reading: the strongest component within +-span cents of `around` (a Hann-windowed
 // probe every quarter cent-step), for a sound whose fundamental is not its loudest partial.
-inline double peak_hz_near(const Span& s, double rate, double near, double span_cents = 120.0) {
-  double best = -1.0, best_hz = near;
+inline double peak_hz_near(const Span& s, double rate, double around, double span_cents = 120.0) {
+  double best = -1.0, best_hz = around;
   for (double c = -span_cents; c <= span_cents; c += 0.25) {
-    const double f = near * std::exp2(c / 1200.0), step = 2.0 * kPi * f / rate;
+    const double f = around * std::exp2(c / 1200.0), step = 2.0 * kPi * f / rate;
     double re = 0.0, im = 0.0;
     const size_t n = s.size();
     for (size_t i = 0; i < n; ++i) {

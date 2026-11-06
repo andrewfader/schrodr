@@ -41,12 +41,12 @@ std::vector<float> play(int model, int key, double velocity, double hold_s, doub
   out.insert(out.end(), tail.begin(), tail.end());
   return out;
 }
-// A tuner's reading: the strongest component within +-span cents of `near` over a window.
-double peak_hz(const std::vector<float>& x, double from_s, double length_s, double near, double span = 40.0) {
+// A tuner's reading: the strongest component within +-span cents of `around` over a window.
+double peak_hz(const std::vector<float>& x, double from_s, double length_s, double around, double span = 40.0) {
   const size_t a = static_cast<size_t>(from_s * kRate), n = static_cast<size_t>(length_s * kRate);
-  double best = -1.0, best_hz = near;
+  double best = -1.0, best_hz = around;
   for (double c = -span; c <= span; c += 0.25) {
-    const double f = near * std::exp2(c / 1200.0), step = kTau * f / kRate;
+    const double f = around * std::exp2(c / 1200.0), step = kTau * f / kRate;
     double re = 0.0, im = 0.0;
     for (size_t i = 0; i < n && a + i < x.size(); ++i) {
       const double w = 0.5 - 0.5 * std::cos(kTau * static_cast<double>(i) / static_cast<double>(n - 1));

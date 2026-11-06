@@ -107,10 +107,10 @@ double tone_near(const Span& s, double hz, double span_cents = 60.0) {
   for (double c = -span_cents; c <= span_cents; c += 2.0) best = std::max(best, measure::tone_amplitude(s, kRate, hz * std::exp2(c / 1200.0)));
   return best;
 }
-double peak_hz(const Span& s, double near, double span_cents = 60.0) {
-  double best = -1.0, best_hz = near;
+double peak_hz(const Span& s, double around, double span_cents = 60.0) {
+  double best = -1.0, best_hz = around;
   for (double c = -span_cents; c <= span_cents; c += 0.5) {
-    const double f = near * std::exp2(c / 1200.0);
+    const double f = around * std::exp2(c / 1200.0);
     const double a = measure::tone_amplitude(s, kRate, f);
     if (a > best) { best = a; best_hz = f; }
   }
