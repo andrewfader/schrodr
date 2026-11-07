@@ -259,9 +259,9 @@ SCENARIO(every_listed_gap_is_still_a_gap) {
     for (const Check& c : compare(*o.rec, o.note, o.has_soft ? &o.soft : nullptr))
       if (is_known_gap(c.id)) {
         seen.insert(c.id);
-        CHECK(!c.pass, c.id + " now meets the bar: strike it from reference_gaps.hpp (" + c.text + ")");
+        CHECK(!c.clear, c.id + " now meets the bar: strike it from reference_gaps.hpp (" + c.text + ")");
       }
-  THEN("each still fails, and each names a comparison that exists");
+  THEN("none clears the bar by more than its dead band, and each names a comparison that exists");
   for (const Gap& g : known_gaps()) CHECK(seen.count(g.id), std::string(g.id) + " is not a comparison any more");
   std::map<std::string, int> causes;
   for (const Gap& g : known_gaps()) ++causes[g.why];

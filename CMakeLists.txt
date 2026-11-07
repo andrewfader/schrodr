@@ -11,6 +11,17 @@ if(MSVC)
 endif()
 
 option(SCHRODR_COVERAGE "Instrument the tests for line coverage (GCC/Clang)" OFF)
+# Instrumented tests run several times slower (engine_tests: 80 s plain, about 900 s with coverage
+# on the CI runner), so their timeouts stretch with them.
+if(SCHRODR_COVERAGE)
+  set(SCHRODR_TIMEOUT_SCALE 3)
+else()
+  set(SCHRODR_TIMEOUT_SCALE 1)
+endif()
+function(schrodr_timeout test seconds)
+  math(EXPR scaled "${seconds} * ${SCHRODR_TIMEOUT_SCALE}")
+  set_tests_properties(${test} PROPERTIES TIMEOUT ${scaled})
+endfunction()
 option(SCHRODR_EDITOR "Build the native editor" ON)
 
 function(schrodr_warnings target)
@@ -97,7 +108,7 @@ function(schrodr_test name)
   schrodr_enable_assertions(${name})
   schrodr_coverage(${name})
   add_test(NAME ${name} COMMAND ${name})
-  set_tests_properties(${name} PROPERTIES TIMEOUT 900)
+  schrodr_timeout(${name} 900)
 endfunction()
 
 schrodr_test(dsp_tests)
@@ -109,7 +120,7 @@ schrodr_test(air_tests)
 schrodr_test(engine_tests)
 # SCHRODR's notes against real recordings, from the numbers in tests/reference_data.hpp.
 schrodr_test(reference_tests)
-set_tests_properties(reference_tests PROPERTIES TIMEOUT 1800)
+schrodr_timeout(reference_tests 1800)
 
 # Suites that load the built .clap and drive it through the public CLAP interfaces, as a host does.
 function(schrodr_plugin_test name)
@@ -120,14 +131,14 @@ function(schrodr_plugin_test name)
   schrodr_warnings(${name})
   schrodr_enable_assertions(${name})
   add_test(NAME ${name} COMMAND ${name} $<TARGET_FILE:schrodr_clap>)
-  set_tests_properties(${name} PROPERTIES TIMEOUT 600)
+  schrodr_timeout(${name} 600)
 endfunction()
 schrodr_plugin_test(plugin_smoke)
 schrodr_plugin_test(note_tests)
 schrodr_plugin_test(state_tests)
 # One proof per parameter, in its advertised unit, from audio. Fails if any parameter has none.
 schrodr_plugin_test(advertised_tests)
-set_tests_properties(advertised_tests PROPERTIES TIMEOUT 1800)
+schrodr_timeout(advertised_tests 1800)
 target_link_libraries(advertised_tests PRIVATE schrodr_core)
 
 # The editor without a window: the real page table and widgets against a fake host.
@@ -168,7 +179,7 @@ if(SCHRODR_EDITOR AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
   schrodr_enable_assertions(frontend_tests)
   schrodr_coverage(frontend_tests)
   add_test(NAME frontend_tests COMMAND frontend_tests)
-  set_tests_properties(frontend_tests PROPERTIES TIMEOUT 120)
+  schrodr_timeout(frontend_tests 120)
 
   # Offscreen editor renders for layout review; not a test, since it needs an X display.
   add_executable(schrodr-ui-preview tools/ui_preview.cpp)

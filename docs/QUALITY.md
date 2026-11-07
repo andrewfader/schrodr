@@ -142,7 +142,10 @@ cents). Velocity follows the usual MIDI readings of the markings: pp 33, mf 80, 
 **Where SCHRODR stands.** SCHRODR meets 410 of the 775 comparisons. The other 365 are listed in
 `tests/reference_gaps.hpp` under 41 causes, each with the numbers. The suite reports them and does
 not fail on them. It fails as soon as one passes, until that line is struck off, so the bar only
-rises. The largest causes:
+rises. Each bar has a 2% dead band: a check fails only when it misses by more than 2%, and a gap
+counts as closed only when it clears the bar by more than 2%. Without it, a number that lands on
+its bar (viola G3 ff's colour, 6.0 dB against 6) passed on Linux and failed on macOS. The largest
+causes:
 - **Grand:** the bass's wound strings are three to six times too flexible (B); the middle and
   bass lack their low partials, so C4 is twice as bright as the Steinway; the prompt sound falls
   at the wrong rate across the compass.

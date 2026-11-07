@@ -32,8 +32,14 @@ namespace reference {
 struct Check {
   std::string id;      // "<recording id>:<measure>", the name a known gap is listed under
   std::string text;    // what was compared, with both numbers
-  bool pass;
+  bool pass;           // meets the bar widened by kSlack: a check fails only on a clear miss
+  bool clear;          // meets the bar narrowed by kSlack: a listed gap is struck only on a clear pass
 };
+
+// The dead band around every bar. A number that lands on its bar comes out a hair either side
+// of it from one compiler and libm to the next (viola G3 ff's colour, 6.0 dB against 6), so
+// neither a regular check nor the gap ledger may turn on that hair.
+constexpr double kSlack = 0.02;
 
 inline bool within_factor(double a, double b, double factor) {
   return a > 0.0 && b > 0.0 && std::max(a, b) / std::min(a, b) <= factor;
@@ -62,25 +68,28 @@ inline std::vector<Check> compare(const Recorded& rec, const Features& ours, con
   const Features& them = rec.features;
   std::vector<Check> out;
   char text[256];
-  const auto add = [&](const char* measure, bool pass) { out.push_back({std::string(rec.id) + ":" + measure, text, pass}); };
+  // `meets(s)` says whether the comparison meets its bar scaled by s.
+  const auto add = [&](const char* measure, const auto& meets) {
+    out.push_back({std::string(rec.id) + ":" + measure, text, meets(1.0 + kSlack), meets(1.0 - kSlack)});
+  };
 
   const double off = measure::cents(ours.f0, nominal_hz(rec.key));
   std::snprintf(text, sizeof(text), "sounds %.1f Hz, %+.0f cents from the key", ours.f0, off);
-  add("pitch", ours.ok && std::abs(off) <= 25.0);
+  add("pitch", [&](double s) { return ours.ok && std::abs(off) <= 25.0 * s; });
 
   const double distance = envelope_distance(ours.bands, them.bands);
   if (inst.colour && distance >= 0.0) {
     std::snprintf(text, sizeof(text), "spectral envelope %.1f dB RMS from the recording's (bar %g)", distance, inst.colour_db);
-    add("colour", distance <= inst.colour_db);
+    add("colour", [&](double s) { return distance <= inst.colour_db * s; });
   }
   std::snprintf(text, sizeof(text), "centroid %.2f harmonics, the recording %.2f (bar x%g)", ours.centroid, them.centroid, inst.brightness);
-  add("brightness", within_factor(ours.centroid, them.centroid, inst.brightness));
+  add("brightness", [&](double s) { return within_factor(ours.centroid, them.centroid, inst.brightness * s); });
 
   if (ours_soft && inst.dynamics) {
     if (const Recorded* soft = softest_partner(rec)) {
       const double mine = ours.level_db - ours_soft->level_db, theirs = them.level_db - soft->features.level_db;
       std::snprintf(text, sizeof(text), "%s to %s rises %.1f dB, the recording %.1f dB (bar 5)", dynamic_name(soft->dynamic), dynamic_name(rec.dynamic), mine, theirs);
-      add("dynamics", std::abs(mine - theirs) <= 5.0);
+      add("dynamics", [&](double s) { return std::abs(mine - theirs) <= 5.0 * s; });
     }
   }
 
@@ -88,28 +97,28 @@ inline std::vector<Check> compare(const Recorded& rec, const Features& ours, con
     case Kind::Struck:
       if (loudest_of_its_note(rec)) {
         std::snprintf(text, sizeof(text), "B %.2e, the recording %.2e (bar x1.5)", ours.inharmonicity, them.inharmonicity);
-        add("inharmonicity", within_factor(ours.inharmonicity, them.inharmonicity, 1.5));
+        add("inharmonicity", [&](double s) { return within_factor(ours.inharmonicity, them.inharmonicity, 1.5 * s); });
       }
       std::snprintf(text, sizeof(text), "prompt sound decays %.1f dB/s, the recording %.1f (bar x1.5)", ours.decay_early, them.decay_early);
-      add("prompt decay", within_factor(ours.decay_early, them.decay_early, 1.5));
+      add("prompt decay", [&](double s) { return within_factor(ours.decay_early, them.decay_early, 1.5 * s); });
       if (them.decay_late > 0.0 && inst.tail_trusted) {
         std::snprintf(text, sizeof(text), "aftersound decays %.1f dB/s, the recording %.1f (bar x1.5)", ours.decay_late, them.decay_late);
-        add("aftersound decay", within_factor(ours.decay_late, them.decay_late, 1.5));
+        add("aftersound decay", [&](double s) { return within_factor(ours.decay_late, them.decay_late, 1.5 * s); });
       }
       break;
     case Kind::Bar:
       if (inst.overtone) {
         std::snprintf(text, sizeof(text), "first overtone at %.3f f1, the recording %.3f (bar 5%%)", ours.overtone_ratio, them.overtone_ratio);
-        add("overtone", std::abs(ours.overtone_ratio / them.overtone_ratio - 1.0) <= 0.05);
+        add("overtone", [&](double s) { return std::abs(ours.overtone_ratio / them.overtone_ratio - 1.0) <= 0.05 * s; });
       }
       if (them.decay_early > 0.0) {  // none where the recording's fundamental gave no clean slope
         std::snprintf(text, sizeof(text), "fundamental decays %.1f dB/s, the recording %.1f (bar x1.5)", ours.decay_early, them.decay_early);
-        add("decay", within_factor(ours.decay_early, them.decay_early, 1.5));
+        add("decay", [&](double s) { return within_factor(ours.decay_early, them.decay_early, 1.5 * s); });
       }
       break;
     case Kind::Bowed:
       std::snprintf(text, sizeof(text), "bow noise %.1f dB under the harmonics, the recording %.1f (bar 6)", -ours.noise_db, -them.noise_db);
-      add("bow noise", std::abs(ours.noise_db - them.noise_db) <= 6.0);
+      add("bow noise", [&](double s) { return std::abs(ours.noise_db - them.noise_db) <= 6.0 * s; });
       break;
     case Kind::Pipe:
       break;  // a pipe's steady tone: its colour and brightness above say it

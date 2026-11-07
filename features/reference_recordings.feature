@@ -11,7 +11,10 @@ Feature: The instruments are held to real recordings
   to each other (docs/QUALITY.md, "The reference recordings").
 
   A comparison not yet met is listed, with its cause, in tests/reference_gaps.hpp. A listed gap
-  that closes fails the suite until it is struck off, so the bar only rises.
+  that closes fails the suite until it is struck off, so the bar only rises. Every bar has a 2%
+  dead band, so that a number landing on its bar cannot pass on one platform and fail on another:
+  a check fails only when it misses the bar by more than 2%, and a gap counts as closed only when
+  it clears the bar by more than 2%.
 
   Executable: tests/reference_tests.cpp (CTest reference_tests).
 
@@ -98,4 +101,4 @@ Feature: The instruments are held to real recordings
   # every_listed_gap_is_still_a_gap
   Scenario: Every listed gap is still a gap
     Given the comparisons listed in tests/reference_gaps.hpp as not yet met
-    Then each still fails the bar and names a comparison that exists
+    Then none clears the bar by more than its dead band, and each names a comparison that exists
