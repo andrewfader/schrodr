@@ -17,6 +17,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cmath>
+#include <cstring>
 #include <cstdint>
 #include <cstdio>
 #include <string>
@@ -796,7 +797,8 @@ class Editor {
     p.polyline({rot(-3, -7), rot(4, 0), rot(-3, 7)}, hover ? text : muted, 3);
     p.rect(placed.header.x, placed.header.y + 8, 3, card_header - 16, any_relevant ? page.accent : faint);
     p.text(placed.header.x + 42, placed.header.y + 29, spec.title, any_relevant ? text : muted, placed.header.w - 190);
-    if (!any_relevant) p.text_right(placed.header.right() - 14, placed.header.y + 28, "inactive for this source", faint, 220, TextSize::Small);
+    // A long title leaves room only for the short form of the badge.
+    if (!any_relevant) p.text_right(placed.header.right() - 14, placed.header.y + 28, std::strlen(spec.title) > 14 ? "inactive" : "inactive for this source", faint, 220, TextSize::Small);
     else if (open < 0.5) {
       char count[40]{};
       std::snprintf(count, sizeof(count), "%zu controls", spec.controls.size());

@@ -9,14 +9,14 @@ and the [preset menu](docs/screenshots/presets.png).
 SCHRODR is a cross-platform CLAP instrument that simulates keyboard instruments from their
 physics rather than playing samples of them: pianos from Cristofori's to a concert grand,
 harpsichords, virginals and a clavichord, the hurdy-gurdy and the Geigenwerk, the celesta and
-its cousins, and a chamber organ. It builds on Linux, Windows and macOS with a native editor
+its cousins, a chamber organ, and a violin, viola and cello played from the keys. It builds on Linux, Windows and macOS with a native editor
 on all three (X11, Win32, Cocoa). It follows the model of [FUZZBOI](https://github.com/andrewfader/fuzzboi): a header-only
 physics engine, a thin CLAP shell, a native editor, and a suite that proves every claim from
 the audio in the unit the claim is made in.
 
 ## What is in it
 
-**Twenty-two instruments**, every one a model of the real thing:
+**Twenty-five instruments**, every one a model of the real thing:
 
 | Instrument | What is simulated |
 |---|---|
@@ -26,6 +26,7 @@ the audio in the unit the claim is made in.
 | Fretted and unfretted clavichords | brass tangents that strike and stay, dividing the string; a firm stroke stretches it sharp, aftertouch bends it (bebung); chromatic neighbours share a pair on the fretted one |
 | Hurdy-gurdy, Geigenwerk | a rosined wheel bowing gut or iron strings with a stick-slip friction curve: keyed chanterelles over bourdons and a buzzing trompette, or a four-octave bowed keyboard |
 | Celesta, glockenspiel, dulcitone, electric piano, toy piano | beams in their bending modes (free-free plates and bars, clamped-free forks, tines and rods, Timoshenko-corrected), mallets through the mode shapes, resonator boxes, a tone bar with a magnetic pickup that barks |
+| Violin, viola, cello | each key a string of the instrument, stopped by a finger on the open string a player takes it on (real scale lengths and string tensions, wound and plain), bowed with horsehair at the player's force, speed and distance from the bridge: the Helmholtz motion and Schelleng's limits come from the stick-slip itself; the left hand's vibrato; a body of measured signature modes (A0, CBR, B1-, B1+) and the bridge hill. Key velocity shapes the stroke; aftertouch or the mod wheel leans into the bow |
 | Chamber organ | flue pipes: an air jet bent by the mouth's flow and switching its flow into an open or stopped bore, voiced to Töpfer's scale, with the chiff, wind pressure and sag, a tremulant, five stops and the pipes on the C and C# sides of the chest |
 
 **The tuner's work**: six temperaments (equal, Pythagorean, quarter-comma meantone,
@@ -38,14 +39,14 @@ Railsback curve emerges from the strings), and unisons left a cent or a saloon's
 cardioid or figure-8 microphone, as a stereo pair or one mono mic, with its proximity effect;
 the room's humidity reaches the soundboard and its temperature the strings.
 
-**Forty-eight presets**, each an instrument in a room at the pitch its music was made at, from
+**Seventy-five presets**, each an instrument in a room at the pitch its music was made at, from
 "Concert grand" and "Honky upright" through "Fortepiano, Walter", "Cristofori 1720", "Flemish,
 lute stop", "French double, Vallotti", "Clavichord, bebung" and "Hurdy-gurdy, trompette" to
-"Electric piano, bark", "Toy piano" and "Organ, principal chorus"; all measured against the
+"Electric piano, bark", "Toy piano", "Organ, principal chorus", "Antique Steinway", "Cello in a hall", "Stradivarius, concert" and "Fiddle, front porch"; all measured against the
 [quality bar](docs/QUALITY.md) by `build/schrodr-preset-audit` and held to it by the test suite.
 
 Sustain, sostenuto and soft pedals from CC 64, 66 and 67 and from parameters; aftertouch and
-the mod wheel for the clavichord's bebung and the hurdy-gurdy's coup; CLAP and MIDI note
+the mod wheel for the clavichord's bebung, the hurdy-gurdy's coup and a swell on the bow; CLAP and MIDI note
 dialects, sample-accurate events, parameter modulation, state with the editor's size.
 
 See [docs/PHYSICS.md](docs/PHYSICS.md) for what is simulated, how it is measured, and what is
@@ -79,7 +80,7 @@ hardware, installed plug-ins or the network.
 |---|---|
 | `dsp_tests` | the temperaments against the treatises, the limiter, the modal bank, the plucked shape |
 | `string_tests` | one string's tension, stiffness and losses from its wire; the loss and dispersion fits against the physics, in cents and seconds; the force plateau |
-| `keyboard_tests` | the scalings' strings, every key at its tuned pitch, the tuner's stretch, the partials' stretch, the hammer's contact and brightness against touch, Weinreich's coupled unisons, the harpsichord's indifference to touch and its registers, the clavichord's tangent and bebung, dampers, pedals and sympathetic strings, the wheel, stability with everything ringing |
+| `keyboard_tests` | the scalings' strings, every key at its tuned pitch, the tuner's stretch, the partials' stretch, the hammer's contact and brightness against touch, Weinreich's coupled unisons, the harpsichord's indifference to touch and its registers, the clavichord's tangent and bebung, dampers, pedals and sympathetic strings, the wheel, the violin family's strings, pitch, Helmholtz motion, swell and attack, stability with everything ringing |
 | `bars_tests` | beam mode ratios and lengths, every bar at its pitch, dampers and resonators, the tine's bark, the mallet |
 | `pipes_tests` | every rank on its pitch, the stopped pipe's odd harmonics, the chiff, the tremulant, the stops, the wind, the C and C# sides |
 | `air_tests` | the room and its air against the physics: the speed of sound, ISO 9613-1, Sabine's time, wood moisture, string expansion |
@@ -100,7 +101,7 @@ instrument for listening, and `tools/coverage.py` reports line coverage from a
     src/params.hpp        the parameter table (ids, ranges, units, option names)
     src/presets.hpp       the factory presets
     src/dsp/string.hpp    one string: the waveguide, the loss and dispersion fits, the force plateau, the plucked shape
-    src/dsp/keyboard.hpp  the string keyboards: scalings, hammers, plectra, tangents, the wheel, the bridge, the soundboard
+    src/dsp/keyboard.hpp  the string keyboards: scalings, hammers, plectra, tangents, the wheel, the bow, the bridge, the soundboard
     src/dsp/bars.hpp      the struck bars
     src/dsp/pipes.hpp     the organ's flue pipes
     src/dsp/temperament.hpp the temperaments

@@ -62,7 +62,7 @@ inline ScopeTrace scope_trace(const std::array<float, kScopeSamples>& s, double 
 // The compass of an instrument: lowest and highest key.
 inline std::pair<int, int> compass(int instrument) {
   using namespace params;
-  if (is_string_instrument(instrument)) { const auto& s = dsp::keyboard::spec(instrument); return {s.low, s.high}; }
+  if (is_string_instrument(instrument)) { const auto& s = dsp::keyboard::spec(params::keyboard_model(instrument)); return {s.low, s.high}; }
   if (is_bar_instrument(instrument)) {
     static constexpr std::array<std::pair<int, int>, kBarInstrumentCount> kBars{{{60, 108}, {79, 108}, {41, 89}, {28, 100}, {53, 89}}};
     return kBars[static_cast<size_t>(instrument - kStringInstrumentCount)];
@@ -77,7 +77,7 @@ class Artwork {
   void draw(int page, Painter& g, const Rect& r) const {
     switch (page) {
       case 0: draw_keyboard(g, r); break;
-      case 1: draw_hammer(g, r); break;
+      case 1: if (params::is_violin_family(instrument())) draw_bow(g, r); else draw_hammer(g, r); break;
       case 2: draw_stops(g, r); break;
       case 4: draw_room(g, r); break;
       default: break;
@@ -166,6 +166,59 @@ class Artwork {
     g.rect(hx - 2, sy - 16, 4, 14, relevant ? orange : faint);
     std::snprintf(line, sizeof(line), "1/%.1f of the string", 1.0 / strike);
     g.text(hx + 16, sy - 22, line, relevant ? soft : faint, 220, TextSize::Small);
+  }
+
+  // A bowed string: Schelleng's diagram, the playable bow forces between the least that makes
+  // the string stick and slip once a period and the most before it grinds, against the bow's
+  // distance from the bridge, for the instrument's second string at the set bow speed (both on
+  // log scales); the setting is the dot. Beside it the string, nut to bridge, with the bow on it.
+  void draw_bow(Painter& g, const Rect& r) const {
+    using namespace theme;
+    const auto& s = dsp::keyboard::spec(params::keyboard_model(instrument()));
+    const double hz = dsp::midi_to_hz(s.open[1]);
+    const double z = s.open_tension[1] / (2.0 * s.scale_m * hz);   // sqrt(T mu), mu from the tuning
+    const double v = value(params::kBowSpeed), beta = value(params::kBowPosition), force = value(params::kBowForce);
+    // Schelleng (1973): F_max = 2 Z v / (beta dmu), F_min = Z^2 v / (2 R beta^2 dmu), with the
+    // friction's fall dmu and R the bridge's resistance as the string sees it.
+    constexpr double dmu = 0.55;
+    const double resistance = 1.0 / std::max(s.floor_mobility, 1e-4);
+    const auto fmax = [&](double b) { return 2.0 * z * v / (b * dmu); };
+    const auto fmin = [&](double b) { return z * z * v / (2.0 * resistance * b * b * dmu); };
+    g.text(r.x + 20, r.y + 24, "SCHELLENG  •  bow force against bow position", muted, 460, TextSize::Small);
+    const int cx = r.x + 60, cw = 420, top = r.y + 40, base = r.bottom() - 22, ch = base - top;
+    constexpr double b_lo = 0.02, b_hi = 0.4, f_lo = 0.01, f_hi = 10.0;
+    const auto px = [&](double b) { return cx + static_cast<int>(std::log(b / b_lo) / std::log(b_hi / b_lo) * cw); };
+    const auto py = [&](double f) { return base - static_cast<int>(std::clamp(std::log(f / f_lo) / std::log(f_hi / f_lo), 0.0, 1.0) * ch); };
+    g.line(cx, base, cx + cw, base, border);
+    g.line(cx, base, cx, top, border);
+    std::vector<Point> upper, lower;
+    for (int i = 0; i <= 60; ++i) {
+      const double b = b_lo * std::pow(b_hi / b_lo, i / 60.0);
+      upper.push_back({px(b), py(fmax(b))});
+      lower.push_back({px(b), py(fmin(b))});
+    }
+    g.polyline(upper, red, 2);
+    g.polyline(lower, cyan, 2);
+    g.text(cx + cw + 8, py(fmax(b_hi)) + 6, "grinds", red, 90, TextSize::Small);
+    g.text(cx + cw + 8, py(fmin(b_hi)) + 6, "whistles", cyan, 90, TextSize::Small);
+    const bool playable = force > fmin(beta) && force < fmax(beta);
+    g.circle(px(beta) - 8, py(force) - 8, 16, playable ? green : orange);
+    g.text(cx - 50, top + 12, "10 N", muted, 48, TextSize::Small);
+    g.text(cx - 50, base, "0.01", muted, 48, TextSize::Small);
+    g.text(cx - 6, base + 20, "bridge", muted, 80, TextSize::Small);
+    g.text_right(cx + cw, base + 20, "0.4 of the string", muted, 200, TextSize::Small);
+    // The string with the bow on it.
+    const int sx = r.x + 640, sw = r.w - 680, sy = r.y + r.h / 2 + 10;
+    g.text(sx, r.y + 24, "THE BOW  •  nut to bridge", muted, 320, TextSize::Small);
+    g.rect(sx - 6, sy - 20, 6, 40, soft);
+    g.rect(sx + sw, sy - 24, 8, 48, soft);
+    g.line(sx, sy, sx + sw, sy, text, 2);
+    const int bx = sx + static_cast<int>((1.0 - std::clamp(beta, 0.0, 1.0)) * sw);
+    g.round_rect(Rect{bx - 5, sy - 46, 10, 92}, 4, orange);
+    char line[160]{};
+    std::snprintf(line, sizeof(line), "%.2f N  •  %.2f m/s  •  1/%.0f of the string from the bridge  •  %s", force, v, 1.0 / std::max(beta, 1e-3),
+                  playable ? "Helmholtz motion" : (force >= fmax(beta) ? "too much force: raucous" : "too little force: surface sound"));
+    g.text(sx, r.bottom() - 18, line, playable ? soft : orange, sw + 20, TextSize::Small);
   }
 
   // Stop knobs on the jamb: the registers on the left, the organ's stops on the right, each

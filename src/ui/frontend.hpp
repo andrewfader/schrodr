@@ -29,7 +29,7 @@ bool gui_param_relevant(const Plugin* p, clap_id id) {
 
 const char* gui_help(clap_id id) {
   switch (id) {
-    case kInstrument: return "Which instrument: a grand or upright, a fortepiano, square piano, Cristofori's first piano or a tangent piano; Flemish, Italian and French harpsichords, a virginal, a spinet, a gut-strung Lautenwerck; fretted and unfretted clavichords; a hurdy-gurdy and a Geigenwerk; celesta, glockenspiel, dulcitone, electric piano and toy piano; a chamber organ.";
+    case kInstrument: return "Which instrument: a grand or upright, a fortepiano, square piano, Cristofori's first piano or a tangent piano; Flemish, Italian and French harpsichords, a virginal, a spinet, a gut-strung Lautenwerck; fretted and unfretted clavichords; a hurdy-gurdy and a Geigenwerk; celesta, glockenspiel, dulcitone, electric piano and toy piano; a chamber organ; a violin, viola and cello, each key bowing its own string.";
     case kMasterDb: return "Overall output level, before the limiter.";
     case kTranspose: return "Shifts every key by whole semitones (the instrument's compass stays where it is).";
     case kPitchA4: return "The pitch of A4: 415 Hz for baroque instruments, 430 for classical ones, 440 or 442 today.";
@@ -42,7 +42,7 @@ const char* gui_help(clap_id id) {
     case kStrikePoint: return "Where the hammer meets the string, as a fraction of its design point: nearer the agraffe is thinner, further in rounder.";
     case kPlectrum: return "What plucks a harpsichord string: a soft quill that rolls off, or hard delrin that snaps.";
     case kMechanics: return "The sounds of the machine: the key reaching its bed, dampers falling, jacks clicking, the pedal's thump.";
-    case kRelease: return "How long the damper takes to stop a released string, 60 dB; the bass dampers are slower.";
+    case kRelease: return "How long the damper (on a violin, viola or cello the finger) takes to stop a released string, 60 dB; the bass is slower.";
     case kBebung: return "A clavichord's bebung: how far the finger's pressure (aftertouch or the mod wheel) bends the pitch.";
     case kWheelSpeed: return "How fast the hurdy-gurdy's crank turns the wheel: the bow speed.";
     case kWheelPressure: return "How hard the strings bear on the wheel: the bow pressure, from a whisper to a growl.";
@@ -78,6 +78,11 @@ const char* gui_help(clap_id id) {
     case kMicPattern: return "Omnidirectional, cardioid or figure-of-eight microphones; close to the instrument a directional one lifts the bass.";
     case kMicSetup: return "A stereo pair, or one microphone hearing the room in mono.";
     case kPreset: return "Loads a complete starting recipe; later edits remain fully automatable.";
+    case kBowForce: return "How hard the bow presses on the string, in newtons: too little for the speed and it will not grip (a whistling surface sound), too much and it grinds. A cellist leans harder than a violinist.";
+    case kBowSpeed: return "How fast the bow is drawn: faster is louder. Key velocity and pressure (aftertouch or the mod wheel) draw it faster and press harder together.";
+    case kBowPosition: return "Where the bow meets the string, as a fraction of it from the bridge. Nearer the bridge the string swings wider for the same stroke and needs more force to grip; further out less force will do.";
+    case kVibrato: return "The left hand's vibrato: how far the finger rolls the pitch either side of the note, in cents. It comes in once the note has spoken.";
+    case kVibratoRate: return "How fast the vibrato swings, in cycles a second; every note's own rate varies a little.";
     default: return "Adjusts this part of the current sound; changes are immediately audible and automatable.";
   }
 }

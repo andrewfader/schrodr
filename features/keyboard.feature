@@ -1,8 +1,8 @@
 Feature: The string keyboards are real instruments, simulated
-  The string keyboards (src/dsp/keyboard.hpp): pianos, harpsichords, clavichords and the
-  wheel-bowed instruments, each a scaling of real strings over a bridge on a soundboard, played
-  by hammers, plectra, tangents or a rosined wheel, with dampers, pedals and sympathetic
-  strings. Each scenario is proved from the model's numbers and its audio.
+  The string keyboards (src/dsp/keyboard.hpp): pianos, harpsichords, clavichords, the
+  wheel-bowed instruments and the violin family, each a scaling of real strings over a bridge
+  on a soundboard, played by hammers, plectra, tangents, a rosined wheel or a bow, with
+  dampers, pedals and sympathetic strings. Each scenario is proved from the model's numbers and its audio.
 
   Executable: tests/keyboard_tests.cpp (CTest keyboard_tests).
 
@@ -91,6 +91,19 @@ Feature: The string keyboards are real instruments, simulated
     Then the dog rattles: at least 6 dB more energy above 3 kHz than with the dog quiet
     Given the Geigenwerk
     Then a key bows its string for as long as it is down, in tune, and the string stops when it lifts off the wheel
+
+  # the_bow_plays_the_violin_family
+  Scenario: The bow plays the violin, viola and cello
+    Given the violin, viola and cello
+    Then each key is stopped on the open string a player takes it on, to the length that sounds it, at that string's tension
+    And their bodies' air modes sit where the makers' do: a violin's A0 near 275 Hz, a viola's a sixth of the way lower, a cello's near 105 Hz
+    When every fifth key of each is bowed for a second without vibrato
+    Then each sounds its key within 10 cents, holds its level within 2 dB while bowed, and stops once the bow and finger lift
+    When the violin's G3 is bowed a tenth and then a fifth of the string from the bridge
+    Then the string is in Helmholtz motion: the bow slips for its own share of every period, a tenth and then a fifth of it
+    When the player leans into the bow (full aftertouch), and when the key is struck hard or softly
+    Then leaning draws the bow faster and harder together: at least 4 dB louder
+    And a hard key sets the string going sooner than a soft one
 
   # the_whole_instrument_is_stable_with_everything_ringing
   Scenario: The whole instrument is stable with everything ringing

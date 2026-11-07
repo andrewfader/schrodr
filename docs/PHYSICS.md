@@ -66,6 +66,9 @@ gauge and wound on a core beyond it. The tension at pitch, the impedance sqrt(T 
 | Unfretted clavichord (Hass 1760) | FF-f'''; a pair to every key | | | a little larger |
 | Hurdy-gurdy (G/C) | g'-g''' on two gut chanterelles; bourdons C and c, trompette c' | 0.345 m chanterelles, drones 0.40 to 0.46 m | a 75 mm wheel a sixth from the bridge | a lute's body |
 | Geigenwerk (Haiden 1575) | C-c'''; single iron and brass | a harpsichord's lengths | 90 mm wheels a fifth from the bridge | an Italian harpsichord's |
+| Violin | G3-A6; G D A E, synthetic cores wound below a plain steel E | 328 mm; G 43, D 43, A 52, E 77 N | a bow, 0.6 N at 0.3 m/s a tenth from the bridge by default | A0 275 Hz, CBR 405, B1- 465, B1+ 540, bridge hill |
+| Viola | C3-E6; C G D A, steel A | 375 mm; C 48, G 45, D 50, A 60 N | as the violin | the violin's modes at 0.83 |
+| Cello | C2-G5; C G D A, wound synthetic C and G, A and D wound on thin steel | 690 mm; C 140, G 137, D 147, A 186 N | a cellist's 1.5 N in the presets | the violin's modes at 0.38 (A0 near 105 Hz), less mobile |
 
 **The hammer** (Hall; Chaigne and Askenfelt 1994) is a mass whose felt pushes with
 F = K u^p (1 + h du/dt): the compression against each string of the note, solved implicitly
@@ -105,6 +108,31 @@ wheel's rim speed is its radius times the crank; its pressure wobbles once a tur
 adds grit. The hurdy-gurdy's keys stop the
 chanterelles (the highest key wins; open g' with none) while the drones sound as long as the
 player cranks, and the trompette's dog slaps the board when the string pulls hard enough.
+
+**The bow** on the violin, viola and cello is the same contact with three differences. A key is
+played on the highest open string at or below it, stopped by the finger to the length that
+sounds it, so it keeps that string's tension and mass. A sliding bow stays sliding until the
+hair's sliding friction could hold the string again (Friedlander's hysteresis, as McIntyre,
+Schumacher and Woodhouse resolve it), and its rosin settles in 0.02 ms, not the wheel's 0.2:
+a violin's E slips for a tenth of a millisecond each period, and re-gripping at the static
+limit cut every slip short of the Helmholtz corner's round trip. With both, the bow slips for
+its own share of every period, a tenth or a fifth of it as it is placed (`keyboard_tests`).
+A bowed string's stick and slip lock its partials into exact harmonics whatever its stiffness
+(mode locking), so it has no dispersion filter, which also leaves the cells next to the bridge
+free for the bow. Deciding once a sample whether the bow holds, the contact's release and grip
+come on average a little late, about 0.3 of a sample a period, and the loop is shortened by
+that while the bow is on the string. The stroke: key velocity sets the bow's speed
+(0.45 to 1 of the Bow speed) and force (0.5 to 1 of the Bow force); the force arrives three
+times faster than the speed and bites at twice itself for the first tenth of a second, so the
+Helmholtz motion forms within a few tenths of a second, as in Guettler's clean attacks;
+aftertouch or the mod wheel multiplies speed and force together by up to two, a swell that
+stays inside Schelleng's triangle. Every key sounds within 10 cents of its pitch while bowed.
+The left hand's vibrato swings the pitch by up to the Vibrato setting either side of the note,
+coming in over a third of a second once the note has spoken, each note at its own rate within
+5 % of the Vibrato rate. The bodies' signature modes are Jansson's and Bissinger's: the air mode
+A0 through the f-holes, the corpus bending mode CBR and the plate modes B1- and B1+ that carry the
+low sound, then a run of plate modes and a dense set rising to the bridge hill and falling off
+above it.
 
 **The bridge** is a junction shared by the strings of a note: every string's arriving wave,
 weighted by its impedance, drives the bridge through its mobility (a floor rising toward the
@@ -187,6 +215,13 @@ the delay within a sample, the absorption within 1 dB, Sabine's time within 25%.
   and the string's push on it are not simulated.
 - The clavichord's tangent is held rigid; its bounce and the key's compliance are not modelled.
 - The hurdy-gurdy's dog is a threshold slap, not a rattling mass; the wheel's cotton is not.
+- The bow is a point: the ribbon of hair, its torsion, the bow's own modes and bow changes are
+  not modelled, nor is the string's torsional motion. Near the bridge the string swings wider
+  as it should, but the radiated sound does not brighten the way a real sul ponticello does.
+  Very light strokes far from the bridge, and some heavy ones, settle into steady double-slip
+  motion rather than Helmholtz motion; the open strings do not ring in sympathy, and a violin's
+  top notes stop at A6. The force needed varies with the string as Schelleng's does, so a
+  cello wants about two and a half times a violin's.
 - The bars' mallets strike at one point; their stiffness-dependent contact spectra are the felt
   law's. The electric piano's amplifier and its tremolo are not modelled.
 - The organ's jet is one-dimensional: no vortex shedding, no edge tones at the mouth, no

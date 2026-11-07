@@ -25,6 +25,11 @@
 //   and the finger's pressure (bebung) bends the pitch.
 // - A rosined wheel bows the string with a stick-slip friction curve (McIntyre, Schumacher and
 //   Woodhouse 1983): the hurdy-gurdy's chanterelles and drones, the Geigenwerk's strings.
+// - A bow does the same with horsehair, at the player's speed, force and distance from the
+//   bridge: the violin, viola and cello, each key its own string stopped by a finger on the
+//   open string a player would take it on, with the left hand's vibrato. Schelleng's limits
+//   (1973) hold of themselves: too little force for the speed and the string will not stick,
+//   too much and it grinds.
 // - Dampers stop a released string over the damper's time; the sustain pedal lifts them all,
 //   the sostenuto those held when it went down; the top notes of a piano have none. Lifted
 //   strings whose partials coincide with a struck note's are woken and ring in sympathy.
@@ -36,7 +41,9 @@
 // excitation" (1986-1992); Chaigne and Askenfelt (1994); Askenfelt and Jansson, "From touch to
 // string vibrations" (1990-1993); O'Brien, Ruckers (1990) for Flemish scalings; Kottick, A
 // History of the Harpsichord (2003); Brauchli, The Clavichord (1998); Pollens, The Early
-// Pianoforte (1995) for Cristofori; Palmer, The Hurdy-Gurdy (1980).
+// Pianoforte (1995) for Cristofori; Palmer, The Hurdy-Gurdy (1980); Cremer, The Physics of the
+// Violin (1984); Schelleng, "The bowed string and the player" (1973); Jansson, Acoustics for
+// Violin and Guitar Makers (2002) and Bissinger (2008) for the bodies' signature modes.
 #pragma once
 
 #include <algorithm>
@@ -63,7 +70,7 @@ constexpr int kLowModes = 10;
 constexpr int kDenseModes = 120;
 constexpr int kFeedbackDense = 30;
 
-enum class Exciter { Hammer, Plectrum, Tangent, Wheel };
+enum class Exciter { Hammer, Plectrum, Tangent, Wheel, Bow };
 
 // A soundboard resonance as the bridge sees it: frequency, quality factor and the peak of its
 // mobility (velocity over force, s/kg).
@@ -108,6 +115,13 @@ struct Spec {
   int damper_top;                      // notes from here up have no dampers
   double damper_s;                     // time the damper takes to stop a string, 60 dB
   bool sostenuto, una_corda, moderator;
+  // A bowed string instrument's four open strings (MIDI, lowest first), their tensions (N) and
+  // the string length from nut to bridge (m). A key is played on the highest open string at or
+  // below it, stopped by a finger to the length that sounds it; open notes at or above
+  // `bass_core_below` are plain steel, those below wound on `bass_core`.
+  std::array<int, 4> open{};
+  std::array<double, 4> open_tension{};
+  double scale_m = 0.0;
 };
 
 inline double interp_log(double a, double b, double t) { return a * std::pow(b / a, std::clamp(t, 0.0, 1.0)); }
@@ -141,10 +155,11 @@ inline double anchor_tension(const Spec& s, int note) {
   return a[n - 1].tension_n;
 }
 
-constexpr int kModelCount = 16;
+constexpr int kModelCount = 19;
 enum Model : int {
   kGrand, kUpright, kFortepiano, kSquare, kCristofori, kTangent, kFlemish, kItalian, kFrench, kVirginal,
-  kSpinet, kLautenwerck, kFrettedClavichord, kUnfrettedClavichord, kHurdyGurdy, kGeigenwerk
+  kSpinet, kLautenwerck, kFrettedClavichord, kUnfrettedClavichord, kHurdyGurdy, kGeigenwerk,
+  kViolin, kViola, kCello
 };
 
 inline const Spec& spec(int model) {
@@ -328,6 +343,46 @@ inline const Spec& spec(int model) {
                       0, 0, 0, 0, 0, 0, 0, 0, false, 0.09, 0.2,
                       scaled(flemish_modes, 1.1, 1.0), 0.009, 1.5, 680, 8000, 26, 26, 0.011, 550, 5500,
                       0.45, 2.5, 0.18, 0.004, 200, 0.05, false, false, false};
+    // The violin family's bodies, as the bridge sees them (Jansson; Bissinger): the air mode A0
+    // through the f-holes, the corpus bending mode CBR, the two strong plate modes B1- and B1+
+    // that carry most of the low sound, then a run of plate modes and the bridge's own rocking
+    // resonance, the bridge hill near 2.5 kHz, as the dense set's rise. A violin's A0 near 275 Hz
+    // and B1 modes near 470 and 540; a viola's a sixth of the way lower; a cello's at 0.38 of the
+    // violin's (A0 near 100 Hz), on a body that gives less to its much heavier strings.
+    const std::array<Mode, kLowModes> violin_modes{{{275, 15, 0.020}, {405, 25, 0.015}, {465, 30, 0.040}, {540, 30, 0.045}, {650, 30, 0.025},
+                                                    {780, 30, 0.022}, {920, 30, 0.020}, {1080, 30, 0.018}, {1300, 30, 0.016}, {1550, 30, 0.015}}};
+    // A violin: G3 D4 A4 E5 on a 328 mm string, synthetic-core strings wound below the steel E,
+    // tensions as a modern set's (G 43, D 43, A 52, E 77 N); one string to a key, no dampers but
+    // the finger, which lifts with the bow. Played to A6: above it a period is two dozen samples,
+    // too few for the once-a-sample contact to keep it in tune.
+    g[kViolin] = {"Violin", Exciter::Bow, 55, 93,
+                  {{{55, 0.328, 43}, {76, 0.328, 77}}}, 2,
+                  Core::Steel, Core::Nylon, 76, 0.75, 1, 1, 1, 0, 200,
+                  0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                  0, 0, 0, 0, 0, 0, 0, 0, false, 0, 0.1,
+                  violin_modes, 0.010, 1.3, 1500, 9000, 40, 20, 0.010, 500, 2500,
+                  0.3, 2.0, 0.2, 0.004, 200, 0.15, false, false, false,
+                  {55, 62, 69, 76}, {43, 43, 52, 77}, 0.328};
+    // A viola: C3 G3 D4 A4 on a 375 mm string, steel A (C 48, G 45, D 50, A 60 N).
+    g[kViola] = {"Viola", Exciter::Bow, 48, 88,
+                 {{{48, 0.375, 48}, {69, 0.375, 60}}}, 2,
+                 Core::Steel, Core::Nylon, 69, 0.75, 1, 1, 1, 0, 200,
+                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                 0, 0, 0, 0, 0, 0, 0, 0, false, 0, 0.1,
+                 scaled(violin_modes, 0.83, 1.1), 0.010, 1.3, 1300, 9000, 36, 20, 0.010, 450, 2200,
+                 0.3, 2.0, 0.2, 0.004, 200, 0.15, false, false, false,
+                 {48, 55, 62, 69}, {48, 45, 50, 60}, 0.375};
+    // A cello: C2 G2 D3 A3 on a 690 mm string, A and D on thin steel cores wound to their
+    // weight (which is why a loud stroke barely sharpens them), wound synthetic G and C
+    // (C 140, G 137, D 147, A 186 N).
+    g[kCello] = {"Cello", Exciter::Bow, 36, 79,
+                 {{{36, 0.690, 140}, {57, 0.690, 186}}}, 2,
+                 Core::Steel, Core::Nylon, 50, 0.45, 1, 1, 1, 0, 200,
+                 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+                 0, 0, 0, 0, 0, 0, 0, 0, false, 0, 0.1,
+                 scaled(violin_modes, 0.38, 0.6), 0.006, 1.3, 650, 8000, 20, 22, 0.006, 250, 1800,
+                 0.3, 2.0, 0.2, 0.004, 200, 0.2, false, false, false,
+                 {36, 43, 50, 57}, {140, 137, 147, 186}, 0.690};
     return g;
   }();
   return specs[static_cast<size_t>(std::clamp(model, 0, kModelCount - 1))];
@@ -365,14 +420,29 @@ inline Hammer hammer_at(const Spec& s, int note, double hardness, double strike_
 
 // The string set of one note on one instrument: the course's length, wire and tension. `course`
 // counts unisons (or, on a harpsichord, 0 the back 8', 1 the front 8', 2 the 4').
+// The open string a bowed note is played on: the highest at or below it (the lowest position).
+inline int open_string(const Spec& s, int note) {
+  int which = 0;
+  for (int i = 0; i < 4; ++i) if (s.open[static_cast<size_t>(i)] <= note) which = i;
+  return which;
+}
+
 inline Physics string_at(const Spec& s, int model, int note, int course, double hz, double temperature_c) {
   (void)model;
   const bool four = s.has_four_foot && course == 2;
-  const double length = anchor_length(s, note) * (four ? 0.5 : 1.0);
-  const double tension = anchor_tension(s, note) * (four ? 0.85 : 1.0);
+  double length = anchor_length(s, note) * (four ? 0.5 : 1.0);
+  double tension = anchor_tension(s, note) * (four ? 0.85 : 1.0);
+  int wire_note = note;
+  if (s.exciter == Exciter::Bow) {
+    // The open string's tension and mass, stopped by the finger to the length that sounds the key.
+    const int open = open_string(s, note);
+    wire_note = s.open[static_cast<size_t>(open)];
+    tension = s.open_tension[static_cast<size_t>(open)];
+    length = s.scale_m * std::exp2(-(note - wire_note) / 12.0);
+  }
   const double f = hz * (four ? 2.0 : 1.0);
   const double mu = tension / std::pow(2.0 * length * f, 2.0);
-  const Core core = note < s.bass_core_below ? s.bass_core : s.treble_core;
+  const Core core = wire_note < s.bass_core_below ? s.bass_core : s.treble_core;
   const string::Material m = string::material(core);
   const double plain_d = std::sqrt(4.0 * mu / (kPi * m.density));
   const double plain_max = s.plain_max_mm * 1e-3;
@@ -412,6 +482,9 @@ struct Setup {
   double bebung_cents = 12.0;
   double wheel_turns = 1.0, wheel_pressure = 0.5, trompette = 0.5;
   bool drones = true;
+  // The bow (N, m/s, fraction of the sounding string from the bridge) and the left hand's
+  // vibrato (peak cents, Hz).
+  double bow_force = 0.6, bow_speed = 0.3, bow_position = 0.1, vibrato_cents = 12.0, vibrato_hz = 5.5;
   bool back8 = true, front8 = false, four = false, lute = false, buff = false;
   double sustain = 0.0;   // 0..1, the pedal's travel (half-pedalling lets the dampers graze)
   bool sostenuto = false;
@@ -492,6 +565,9 @@ class Keyboard {
     uint32_t seed = 0;
     double pan = 0.0;
     double bow_force = 0.0;       // ramps in as the string meets the wheel
+    double bow_v = 0.0;           // the bow's speed, ramping in from rest
+    double bow_touch = 0.5;       // the key's velocity, which sets the stroke
+    double vib_phase = 0.0, vib_time = 0.0, vib_jitter = 1.0;  // the left hand's vibrato; the note's age
     int coup_left = 0;            // samples of the trompette's buzz after a hard key
     bool dog_up = false;          // the trompette's dog is lifted off the board
     uint64_t age = 0;
@@ -501,6 +577,7 @@ class Keyboard {
   void prepare(double rate) {
     rate_ = rate;
     bow_lag_ = 1.0 - std::exp(-1.0 / (0.0002 * rate));
+    hair_lag_ = 1.0 - std::exp(-1.0 / (kHairLagS * rate));
     for (int i = 0; i < kSlots; ++i) {
       Note& n = notes_[static_cast<size_t>(i)];
       n.key = i < kKeys ? kFirstKey + i : 0;
@@ -616,9 +693,19 @@ class Keyboard {
       case Exciter::Tangent: strike(n, velocity, true); break;
       case Exciter::Plectrum: schedule_pluck(n, velocity); break;
       case Exciter::Wheel: n.bowed = true; n.bow_force = 0.0; break;
+      case Exciter::Bow:
+        // The bow is set on the string and drawn: from rest, quicker the harder the key. The
+        // vibrato starts again with the new note, each at its own slightly different rate.
+        if (!n.bowed) { n.bow_force = 0.0; n.bow_v = 0.0; n.vib_time = 0.0; n.vib_phase = kTau * rng_.unipolar(); }
+        n.bowed = true;
+        n.bow_touch = velocity;
+        for (int c = 0; c < n.courses; ++c) n.course[static_cast<size_t>(c)].tuned_ratio = -1.0;  // the bow's loop (retune)
+        n.vib_jitter = 1.0 + 0.05 * rng_.bipolar();
+        break;
     }
     // The key reaching its bed: a soft thud through the case, harder the harder the key is hit.
-    thump_level_ += static_cast<float>(setup_.mechanics * velocity * velocity * 0.4);
+    // (A bow has no keys.)
+    if (g.exciter != Exciter::Bow) thump_level_ += static_cast<float>(setup_.mechanics * velocity * velocity * 0.4);
     if (setup_.sustain >= 0.5 || n.key >= g.damper_top) wake_sympathetic(n);
   }
 
@@ -637,7 +724,10 @@ class Keyboard {
     Note& n = note_for(key);
     if (!n.awake || !n.held) return;
     n.held = false;
-    if (g.exciter == Exciter::Wheel) { n.bowed = false; }
+    if (g.exciter == Exciter::Wheel || g.exciter == Exciter::Bow) {
+      n.bowed = false;
+      for (int c = 0; c < n.courses; ++c) n.course[static_cast<size_t>(c)].tuned_ratio = -1.0;  // free again (retune)
+    }
     if (n.hammer_hold) { n.hammer_active = false; n.hammer_hold = false; }
     if (g.exciter == Exciter::Plectrum) {
       // The jack falls: its plectrum brushes the string on the way down (a touch, the tongue
@@ -650,7 +740,7 @@ class Keyboard {
       click_level_ += static_cast<float>(setup_.mechanics * 0.5);
     } else if (g.exciter == Exciter::Tangent) {
       click_level_ += static_cast<float>(setup_.mechanics * 0.25);
-    } else {
+    } else if (g.exciter != Exciter::Bow) {
       thump_level_ += static_cast<float>(setup_.mechanics * 0.12);
     }
     if (n.sostenuto || (setup_.sustain >= 0.5 && g.damper_top > 0) || key >= g.damper_top) { n.free = true; return; }
@@ -978,7 +1068,11 @@ class Keyboard {
       }
     }
     string::LoopDesign fit = co.rv;
-    string::fit_dispersion(fit, f0, p.inharmonicity, rate_, 3.0);
+    // A bowed string's stick and slip lock its partials into exact harmonics whatever its
+    // stiffness (mode locking: Fletcher 1999), and the bow must be able to sit a tenth of the
+    // string from the bridge, where a dispersion chain lumped at the bridge would stand: so a
+    // bowed string is left without one.
+    if (g.exciter != Exciter::Bow) string::fit_dispersion(fit, f0, p.inharmonicity, rate_, 3.0);
     co.rv.allpass = co.rh.allpass = fit.allpass;
     co.rv.sections = co.rh.sections = fit.sections;
     co.v.design(co.rv);
@@ -1015,7 +1109,11 @@ class Keyboard {
     co.period = rate_ / co.hz;
     refresh_delays(n, co, co.hz);
     const double half_split = cents_ratio(0.5 * g.polarization_split_cents);
-    double upper = co.period / half_split - 1.0 - static_cast<double>(co.lower_len) - co.filter_delay;
+    // A bow decides once a sample whether it holds the string: its release and its grip each
+    // come, on average, half a sample after the moment the string's own motion called for them,
+    // and that lateness would add to every period of a bowed note. The loop is that much shorter.
+    const double contact = g.exciter == Exciter::Bow && n.bowed ? kBowContactLag : 0.0;
+    double upper = co.period / half_split - 1.0 - static_cast<double>(co.lower_len) - co.filter_delay - contact;
     if (upper < 1.5) {
       co.lower_len = static_cast<size_t>(std::max(2.0, std::floor(0.5 * (co.period - 1.0 - co.filter_delay))));
       upper = co.period / half_split - 1.0 - static_cast<double>(co.lower_len) - co.filter_delay;
@@ -1026,7 +1124,7 @@ class Keyboard {
     upper = std::max(1.0, upper);
     co.upper_delay = std::floor(upper);
     co.nut_frac = upper - co.upper_delay;
-    const double upper_h = std::max(1.0, co.period * half_split - 1.0 - static_cast<double>(co.lower_len) - co.filter_delay_h);
+    const double upper_h = std::max(1.0, co.period * half_split - 1.0 - static_cast<double>(co.lower_len) - co.filter_delay_h - contact);
     co.upper_delay_h = std::floor(upper_h);
     co.nut_frac_h = upper_h - co.upper_delay_h;
     co.tuned_ratio = ratio;
@@ -1167,6 +1265,7 @@ class Keyboard {
   void quiet(Note& n) {
     n.awake = n.held = n.damping = n.free = n.sympathetic = n.bowed = n.hammer_active = n.hammer_hold = false;
     n.env = 0.0f; n.prev_force = 0.0f; n.coup_left = 0; n.dog_up = false;
+    n.bow_force = 0.0; n.bow_v = 0.0; n.vib_time = 0.0;
     for (auto& co : n.course) {
       co.v.clear(); co.h.clear();
       co.env = 0.0f; co.filtered_v = co.filtered_h = 0.0f;
@@ -1425,13 +1524,39 @@ class Keyboard {
   void step_bow(Note& n) {
     const Spec& g = spec();
     const double dt = 1.0 / rate_;
-    const double rim = kTau * g.wheel_radius_m * setup_.wheel_turns;
-    // The wheel is never quite round nor evenly rosined: its pressure wobbles once a turn and
-    // the rosin's grain adds a grit the player hears as the wheel's texture.
-    const double wobble = 1.0 + 0.08 * std::sin(kTau * wheel_phase_) + 0.02 * rng_.bipolar();
-    const double target = (0.25 + 1.3 * std::clamp(setup_.wheel_pressure, 0.0, 1.0)) * wobble;
-    n.bow_force += (target - n.bow_force) * std::min(1.0, dt / 0.02);
+    double rim, beta;
+    if (g.exciter == Exciter::Bow) {
+      // The player's stroke: the key's velocity sets how fast and how hard the bow goes in, and
+      // leaning on it (aftertouch or the mod wheel) draws it faster and presses harder together,
+      // as a player swells a note, keeping the force in step with the speed (Schelleng). A hard
+      // key sets the bow going in a dozen milliseconds, a soft one eases it in over ninety.
+      const double touch = std::clamp(n.bow_touch, 0.0, 1.0);
+      const double swell = 1.0 + aftertouch_;
+      const double speed = std::clamp(setup_.bow_speed, 0.01, 2.0) * (0.45 + 0.55 * touch) * swell;
+      // For the first tenth of a second the player bites harder (vib_time is the note's age),
+      // and the hair's grain makes the force waver by a percent or two all through the stroke.
+      const double bite = 1.0 + kBite * std::exp(-n.vib_time / 0.1);
+      const double force = std::clamp(setup_.bow_force, 0.02, 4.0) * (0.5 + 0.5 * touch) * swell * bite * (1.0 + 0.015 * rng_.bipolar());
+      // The bow bites before it moves: the force is on the string in a third of the time the
+      // stroke takes to reach its speed, so the string is gripped through the acceleration and
+      // the Helmholtz motion forms at once, as in Guettler's clean attacks (2002), rather than
+      // after a second of several slips a period.
+      const double follow = std::min(1.0, dt / lerp(0.09, 0.012, touch));
+      n.bow_v += (speed - n.bow_v) * follow;
+      n.bow_force += (force - n.bow_force) * std::min(1.0, 3.0 * follow);
+      rim = n.bow_v;
+      beta = std::clamp(setup_.bow_position, 0.02, 0.4);
+    } else {
+      rim = kTau * g.wheel_radius_m * setup_.wheel_turns;
+      beta = g.wheel_ratio;
+      // The wheel is never quite round nor evenly rosined: its pressure wobbles once a turn and
+      // the rosin's grain adds a grit the player hears as the wheel's texture.
+      const double wobble = 1.0 + 0.08 * std::sin(kTau * wheel_phase_) + 0.02 * rng_.bipolar();
+      const double target = (0.25 + 1.3 * std::clamp(setup_.wheel_pressure, 0.0, 1.0)) * wobble;
+      n.bow_force += (target - n.bow_force) * std::min(1.0, dt / 0.02);
+    }
     const double fb = n.bow_force;
+    const double settle = g.exciter == Exciter::Bow ? hair_lag_ : bow_lag_;
     constexpr double mu_s = 0.8, mu_d = 0.25, v0 = 0.2;
     const auto mu = [&](double dv) { return mu_d + (mu_s - mu_d) * v0 / (v0 + dv); };
     for (int c = 0; c < n.courses; ++c) {
@@ -1439,7 +1564,7 @@ class Keyboard {
       if (!co.active) continue;
       // On a whole cell: a plateau is laid in whole cells, and the point must read back exactly
       // what it pushed in, or the bow sees a string that is not there.
-      const double x = std::clamp(std::floor((1.0 - g.wheel_ratio) * (co.upper_delay + 0.5 * co.string_delay)), 1.0, co.upper_delay - 1.0);
+      const double x = std::clamp(std::floor((1.0 - beta) * (co.upper_delay + 0.5 * co.string_delay)), 1.0, co.upper_delay - 1.0);
       // The string's velocity under the wheel over the coming sample from the waves about to
       // arrive from either side (the cells one step away on each rail), before any push: known
       // now, so the contact is solved without a sample's delay, which would make the hold an
@@ -1458,16 +1583,24 @@ class Keyboard {
       // fall would be a negative resistance under the wheel, amplifying every wave that passes
       // through a sliding contact at the frequencies the string hardly damps; followed with
       // its lag, the string slides on friction that cannot flicker, as the real contact does.
-      const double hold = mu_s * fb;
+      // A bow that is sliding stays sliding until the hair's sliding friction could hold the
+      // string again (Friedlander's hysteresis, as McIntyre, Schumacher and Woodhouse resolve
+      // it): re-gripping at the static limit instead would cut every slip short, and the
+      // Helmholtz corner, which takes the bow's share of the period to go to the bridge and
+      // back, could never free it. The wheels keep their single-valued contact.
+      const bool bow = g.exciter == Exciter::Bow;
+      const double slide = std::min(co.bow_s, mu_s) * fb;
+      const double hold = bow && co.bow_dv > 0.0 ? slide : mu_s * fb;
       const double needed = 2.0 * z * lag;
       double f;
       if (std::abs(needed) <= hold) {
         f = needed;
         co.bow_dv = 0.0;
-        co.bow_s += (mu_s - co.bow_s) * bow_lag_;  // cooling back toward the static friction
+        co.bow_s += (mu_s - co.bow_s) * settle;  // cooling back toward the static friction
       } else {
-        const double excess = (std::abs(needed) - hold) / (2.0 * z);
-        co.bow_s += (mu(excess) - co.bow_s) * bow_lag_;
+        // How fast the string slides under the contact: what the friction cannot take of the lag.
+        const double excess = std::max((std::abs(needed) - (bow ? slide : hold)) / (2.0 * z), bow ? 1e-9 : 0.0);
+        co.bow_s += (mu(excess) - co.bow_s) * settle;
         f = (lag >= 0.0 ? 1.0 : -1.0) * fb * std::min(co.bow_s, mu_s);
         co.bow_dv = excess;
       }
@@ -1509,7 +1642,16 @@ class Keyboard {
     if (n.bowed || (g.exciter == Exciter::Wheel && n.bowed)) step_bow(n);
     std::array<float, 2> sum{};
     std::array<bool, 2> used{};
-    const double bebung = g.exciter == Exciter::Tangent ? n.lift_ratio * cents_ratio(setup_.bebung_cents * aftertouch_) : 1.0;
+    double bebung = g.exciter == Exciter::Tangent ? n.lift_ratio * cents_ratio(setup_.bebung_cents * aftertouch_) : 1.0;
+    if (g.exciter == Exciter::Bow) n.vib_time += 1.0 / rate_;  // the bowed note's age
+    if (g.exciter == Exciter::Bow && setup_.vibrato_cents > 0.0) {
+      // The left hand's vibrato: the finger rolls on the string, its pitch swinging either side
+      // of the note; it comes in once the note has spoken, over a third of a second.
+      n.vib_phase += kTau * std::clamp(setup_.vibrato_hz, 0.5, 12.0) * n.vib_jitter / rate_;
+      if (n.vib_phase >= kTau) n.vib_phase -= kTau;
+      const double onset = std::clamp((n.vib_time - 0.15) / 0.35, 0.0, 1.0);
+      bebung *= cents_ratio(std::min(setup_.vibrato_cents, 100.0) * onset * std::sin(n.vib_phase));
+    }
     const float hc = static_cast<float>(g.horizontal_coupling);
     for (int c = 0; c < n.courses; ++c) {
       Course& co = n.course[static_cast<size_t>(c)];
@@ -1620,7 +1762,16 @@ class Keyboard {
   std::array<string::ModalBank<kLowModes + kDenseModes>, 2> board_{};
   string::ModalBank<kLowModes + kFeedbackDense> feedback_{};
   float feedback_out_ = 0.0f, floor_hp_ = 0.9f;
-  double bow_lag_ = 0.3;
+  double bow_lag_ = 0.3, hair_lag_ = 0.5;
+ public:
+  // How long a bow's rosin takes to settle to its friction: a violin's E slips for a tenth of a
+  // millisecond each period, so the contact must follow faster than the wheel's.
+  static constexpr double kHairLagS = 0.00002;
+  // Samples of lateness per period a once-a-sample stick-slip decision adds (see retune).
+  static constexpr double kBowContactLag = 0.3;
+  // How much harder than the set force a stroke bites as it starts (see step_bow).
+  static constexpr double kBite = 1.0;
+ private:
   std::array<OnePole, 2> accel_{}, rolloff_{};
   std::array<DcBlocker, 2> dc_{};
   OnePole thump_tone_, click_tone_;

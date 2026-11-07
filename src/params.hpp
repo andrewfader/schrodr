@@ -38,12 +38,15 @@ enum ParamId : uint32_t {
   kRoomSize, kRoomAbsorption, kMicDistance, kHumidity, kTemperature, kMicPattern, kMicSetup,
   // --- presets ----------------------------------------------------------------------------------------
   kPreset,
+  // --- the bow and the left hand (violin, viola, cello) ----------------------------------------------
+  kBowForce, kBowSpeed, kBowPosition, kVibrato, kVibratoRate,
   kParamCount
 };
 
 // How a value is shown to the musician. Stepped parameters with names draw from an option table.
 enum class Unit : uint8_t {
-  Plain, Ms, Seconds, Percent, Db, Hz, Semitones, Cents, Count, Options, Metres, Celsius, TurnsPerSecond
+  Plain, Ms, Seconds, Percent, Db, Hz, Semitones, Cents, Count, Options, Metres, Celsius, TurnsPerSecond,
+  Newtons, MetresPerSecond
 };
 
 struct ParamSpec {
@@ -58,8 +61,10 @@ struct ParamSpec {
 // --- option tables -------------------------------------------------------------------------------
 
 // The instruments, in the order of dsp::keyboard::Model (the string keyboards), then the bars
-// (dsp::bars::Model) and the organ. kStringInstrumentCount string keyboards come first.
-constexpr int kInstrumentCount = 22;
+// (dsp::bars::Model) and the organ; then, appended because an instrument's index is its saved
+// value, the bowed strings, which are dsp::keyboard models again (keyboard_model maps them).
+// kStringInstrumentCount string keyboards come first.
+constexpr int kInstrumentCount = 25;
 constexpr int kStringInstrumentCount = 16;
 constexpr int kBarInstrumentCount = 5;
 constexpr const char* kInstrumentNames[kInstrumentCount] = {
@@ -67,19 +72,27 @@ constexpr const char* kInstrumentNames[kInstrumentCount] = {
     "Tangent piano", "Flemish harpsichord", "Italian harpsichord", "French harpsichord", "Virginal",
     "Spinet", "Lautenwerck", "Fretted clavichord", "Unfretted clavichord", "Hurdy-gurdy", "Geigenwerk",
     "Celesta", "Glockenspiel", "Dulcitone", "Electric piano", "Toy piano",
-    "Chamber organ"};
+    "Chamber organ",
+    "Violin", "Viola", "Cello"};
 enum Instrument : int {
   kGrand, kUpright, kFortepiano, kSquare, kCristofori, kTangent, kFlemish, kItalian, kFrench, kVirginal,
   kSpinet, kLautenwerck, kFrettedClavichord, kUnfrettedClavichord, kHurdyGurdy, kGeigenwerk,
   kCelesta, kGlockenspiel, kDulcitone, kElectricPiano, kToyPiano,
-  kOrgan
+  kOrgan,
+  kViolin, kViola, kCello
 };
-constexpr bool is_string_instrument(int i) { return i >= 0 && i < kStringInstrumentCount; }
+constexpr int kFirstBowedString = kViolin, kBowedStringCount = 3;
+constexpr bool is_violin_family(int i) { return i >= kFirstBowedString && i < kFirstBowedString + kBowedStringCount; }
+constexpr bool is_string_instrument(int i) { return (i >= 0 && i < kStringInstrumentCount) || is_violin_family(i); }
 constexpr bool is_bar_instrument(int i) { return i >= kStringInstrumentCount && i < kStringInstrumentCount + kBarInstrumentCount; }
 constexpr bool is_organ(int i) { return i == kOrgan; }
 constexpr bool is_harpsichord(int i) { return i >= kFlemish && i <= kLautenwerck; }
 constexpr bool is_clavichord(int i) { return i == kFrettedClavichord || i == kUnfrettedClavichord; }
-constexpr bool is_bowed(int i) { return i == kHurdyGurdy || i == kGeigenwerk; }
+constexpr bool is_wheel(int i) { return i == kHurdyGurdy || i == kGeigenwerk; }
+constexpr bool is_bowed(int i) { return is_wheel(i) || is_violin_family(i); }
+// The dsp::keyboard model that plays a string instrument: the first sixteen are their own, the
+// bowed strings follow the Geigenwerk there.
+constexpr int keyboard_model(int i) { return is_violin_family(i) ? kStringInstrumentCount + (i - kFirstBowedString) : i; }
 constexpr bool is_hammered(int i) { return i >= kGrand && i <= kTangent; }
 
 constexpr int kTemperamentCount = 6;
@@ -93,7 +106,7 @@ constexpr const char* kRoomSizeNames[kRoomSizeCount] = {"Off", "Booth", "Bedroom
 constexpr std::array<double, kRoomSizeCount> kRoomVolumes{0.0, 10.0, 35.0, 150.0, 600.0, 3000.0, 12000.0};
 constexpr const char* kMicPatternNames[] = {"Omni", "Cardioid", "Figure-8"};
 constexpr const char* kMicSetupNames[] = {"Stereo pair", "Mono"};
-constexpr int kPresetCount = 48;  // The names live in presets.hpp; the table only needs the size.
+constexpr int kPresetCount = 75;  // The names live in presets.hpp; the table only needs the size.
 
 constexpr std::array<ParamSpec, kParamCount> kSpecs{{
     // the instrument and its tuning
@@ -153,6 +166,12 @@ constexpr std::array<ParamSpec, kParamCount> kSpecs{{
     {"Mic setup", "Room", 0, 1, 0, true, Unit::Options, kMicSetupNames},
     // presets
     {"Preset", "Presets", 0, kPresetCount - 1, 0, true, Unit::Plain, nullptr},
+    // the bow and the left hand
+    {"Bow force", "Action/Bow", 0.1, 3.0, 0.6, false, Unit::Newtons, nullptr},
+    {"Bow speed", "Action/Bow", 0.05, 1.0, 0.3, false, Unit::MetresPerSecond, nullptr},
+    {"Bow position", "Action/Bow", 0.04, 0.25, 0.1, false, Unit::Percent, nullptr},
+    {"Vibrato", "Action/Bow", 0, 40, 12, false, Unit::Cents, nullptr},
+    {"Vibrato rate", "Action/Bow", 3, 8, 5.5, false, Unit::Hz, nullptr},
 }};
 
 // The preset parameter's value names come from the preset table, which lives above this header
@@ -195,6 +214,8 @@ inline bool format_value(uint32_t id, double value, char* out, uint32_t capacity
     case Unit::Metres: std::snprintf(out, capacity, value < 1.0 ? "%.2f m" : "%.1f m", value); break;
     case Unit::Celsius: std::snprintf(out, capacity, "%.0f C", value); break;
     case Unit::TurnsPerSecond: std::snprintf(out, capacity, "%.2f turns/s", value); break;
+    case Unit::Newtons: std::snprintf(out, capacity, "%.2f N", value); break;
+    case Unit::MetresPerSecond: std::snprintf(out, capacity, "%.2f m/s", value); break;
     case Unit::Plain:
       if (s.stepped && s.min == 0 && s.max == 1) std::snprintf(out, capacity, value >= 0.5 ? "On" : "Off");
       else std::snprintf(out, capacity, "%g", value);

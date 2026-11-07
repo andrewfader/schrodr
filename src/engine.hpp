@@ -62,6 +62,9 @@ constexpr std::array<double, params::kInstrumentCount> kInstrumentDb{
       -3.0,   // electric piano
       -3.0,   // toy piano
      -9.5,   // chamber organ
+      +9.3,   // violin
+     +14.1,   // viola
+     +20.8,   // cello
 };
 inline double gain(int instrument) { return dsp::db_to_gain(kInstrumentDb[static_cast<size_t>(std::clamp(instrument, 0, params::kInstrumentCount - 1))]); }
 }  // namespace levels
@@ -201,6 +204,7 @@ class Engine {
     configure(s);
     master_.target(dsp::db_to_gain(s[params::kMasterDb]));
     const bool strings = params::is_string_instrument(instrument_), bars = params::is_bar_instrument(instrument_);
+    const bool violin = params::is_violin_family(instrument_);
     room_.configure(room_settings(s));
     const int lid = std::clamp(static_cast<int>(std::lround(s[params::kLid])), 0, 2);
     // The lid: closed, the top end and a few decibels go; half, less so; open, nothing.
@@ -214,7 +218,8 @@ class Engine {
       float l = 0.0f, r = 0.0f;
       if (strings) {
         keyboard_.render(l, r);
-        l = lid_[0].low(l) * lid_gain; r = lid_[1].low(r) * lid_gain;
+        // A violin has no lid.
+        if (!violin) { l = lid_[0].low(l) * lid_gain; r = lid_[1].low(r) * lid_gain; }
       } else if (bars) bars_.render(l, r);
       else organ_.render(l, r);
       l *= trim; r *= trim;
@@ -257,7 +262,7 @@ class Engine {
 
   static dsp::keyboard::Setup keyboard_setup(const Settings& s, bool sustain, bool sostenuto, double soft) {
     dsp::keyboard::Setup k;
-    k.model = std::clamp(s.instrument(), 0, dsp::keyboard::kModelCount - 1);
+    k.model = std::clamp(params::keyboard_model(s.instrument()), 0, dsp::keyboard::kModelCount - 1);
     k.a4 = s[params::kPitchA4];
     k.temperament = static_cast<int>(std::lround(s[params::kTemperament]));
     k.root = static_cast<int>(std::lround(s[params::kTemperamentRoot]));
@@ -273,6 +278,11 @@ class Engine {
     k.wheel_pressure = s[params::kWheelPressure];
     k.trompette = s[params::kTrompette];
     k.drones = s.on(params::kDrones);
+    k.bow_force = s[params::kBowForce];
+    k.bow_speed = s[params::kBowSpeed];
+    k.bow_position = s[params::kBowPosition];
+    k.vibrato_cents = s[params::kVibrato];
+    k.vibrato_hz = s[params::kVibratoRate];
     k.back8 = s.on(params::kBack8); k.front8 = s.on(params::kFront8); k.four = s.on(params::kFour); k.lute = s.on(params::kLute); k.buff = s.on(params::kBuff);
     k.sustain = sustain ? std::max(0.5, s[params::kSustain]) : 0.0;
     k.sostenuto = sostenuto;

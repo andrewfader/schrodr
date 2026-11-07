@@ -374,6 +374,79 @@ SCENARIO(the_wheel_bows_the_strings) {
   CHECK(rms_db(stopped, 0.4, 0.2) < rms_db(bowed, 0.5, 0.3) - 30.0, "stops");
 }
 
+SCENARIO(the_bow_plays_the_violin_family) {
+  GIVEN("the violin, viola and cello");
+  THEN("each key is stopped on the open string a player takes it on, to the length that sounds it, at that string's tension");
+  Keyboard v = make(kViolin), va = make(kViola), c = make(kCello);
+  // Violin A4 is the open A (328 mm, 52 N); B5 is the E string stopped a fifth up, 328 mm x 2^(-7/12).
+  CHECK(std::abs(v.physics(69).length - 0.328) < 1e-6 && std::abs(v.physics(69).tension - 52.0) < 1.0, ::spec::fmt("violin A4 %.3f m at %.1f N", v.physics(69).length, v.physics(69).tension));
+  CHECK(std::abs(v.physics(83).length - 0.328 * std::exp2(-7.0 / 12.0)) < 1e-6 && std::abs(v.physics(83).tension - 77.0) < 1.5 && !v.physics(83).wound,
+        ::spec::fmt("violin B5 on the plain steel E: %.3f m at %.1f N", v.physics(83).length, v.physics(83).tension));
+  CHECK(v.physics(55).wound && v.physics(62).wound, "the violin's G and D are wound");
+  CHECK(std::abs(va.physics(48).length - 0.375) < 1e-6 && std::abs(va.physics(48).tension - 48.0) < 1.0, ::spec::fmt("viola C3 %.3f m at %.1f N", va.physics(48).length, va.physics(48).tension));
+  CHECK(std::abs(c.physics(36).length - 0.690) < 1e-6 && std::abs(c.physics(36).tension - 140.0) < 2.5, ::spec::fmt("cello C2 %.3f m at %.1f N", c.physics(36).length, c.physics(36).tension));
+  // E3 on the cello is the C string's neighbour G stopped a major sixth up.
+  CHECK(std::abs(c.physics(52).length - 0.690 * std::exp2(-2.0 / 12.0)) < 1e-6, ::spec::fmt("cello E3 on the D string, %.3f m", c.physics(52).length));
+  THEN("their bodies' air modes sit where the makers' do: a violin's A0 near 275 Hz, a viola's a sixth of the way lower, a cello's near 105 Hz");
+  CHECK(std::abs(keyboard::spec(kViolin).modes[0].hz - 275.0) < 1.0 && std::abs(keyboard::spec(kViola).modes[0].hz - 228.0) < 2.0 && std::abs(keyboard::spec(kCello).modes[0].hz - 104.5) < 2.0,
+        ::spec::fmt("A0 at %.0f, %.0f Hz", keyboard::spec(kViola).modes[0].hz, keyboard::spec(kCello).modes[0].hz));
+
+  WHEN("every fifth key of each is bowed for a second without vibrato");
+  bool tuned = true, steady = true, stops = true;
+  for (int model : {kViolin, kViola, kCello}) {
+    const Spec& g = keyboard::spec(model);
+    for (int key = g.low; key <= g.high; key += 5) {
+      // A cellist leans on the bow about two and a half times as hard as a violinist.
+      Setup s; s.vibrato_cents = 0.0; s.bow_force = model == kCello ? 1.5 : 0.6;
+      Keyboard k = make(model, s);
+      k.note_on(key, 0.7, 1);
+      const auto bowed = run(k, 1.2);
+      k.note_off(key);
+      const auto after = run(k, 0.8);
+      const double cents = cents_off(bowed, 0.6, 0.5, k.pitch_at(key), 60.0);
+      if (std::abs(cents) > 10.0) { tuned = false; std::printf("    %s key %d: %+.1f cents\n", g.name, key, cents); }
+      if (std::abs(rms_db(bowed, 0.5, 0.3) - rms_db(bowed, 0.9, 0.3)) > 2.0) { steady = false; std::printf("    %s key %d: %.1f then %.1f dB\n", g.name, key, rms_db(bowed, 0.5, 0.3), rms_db(bowed, 0.9, 0.3)); }
+      if (!(rms_db(after, 0.6, 0.2) < rms_db(bowed, 0.8, 0.3) - 30.0)) { stops = false; std::printf("    %s key %d: rings on\n", g.name, key); }
+    }
+  }
+  THEN("each sounds its key within 10 cents, holds its level within 2 dB while bowed, and stops once the bow and finger lift");
+  CHECK(tuned, "in tune");
+  CHECK(steady, "sustained");
+  CHECK(stops, "stops");
+
+  WHEN("the violin's G3 is bowed a tenth and then a fifth of the string from the bridge");
+  const auto slip_share = [](double beta) {
+    Setup s; s.vibrato_cents = 0.0; s.bow_position = beta; s.bow_force = 1.0;
+    Keyboard k = make(kViolin, s);
+    k.note_on(55, 0.7, 3);
+    int slipping = 0, total = 0;
+    for (int i = 0; i < 48000; ++i) { float l, r; k.render(l, r); if (i >= 24000) { ++total; slipping += k.note(55).course[0].bow_dv > 0.0; } }
+    return static_cast<double>(slipping) / total;
+  };
+  const double tenth = slip_share(0.1), fifth = slip_share(0.2);
+  THEN("the string is in Helmholtz motion: the bow slips for its own share of every period, a tenth and then a fifth of it");
+  CHECK(std::abs(tenth - 0.1) < 0.03 && std::abs(fifth - 0.2) < 0.05, ::spec::fmt("slipping %.3f and %.3f of the time", tenth, fifth));
+
+  WHEN("the player leans into the bow (full aftertouch), and when the key is struck hard or softly");
+  const auto bow = [](double velocity, double pressure) {
+    Setup s; s.vibrato_cents = 0.0;
+    Keyboard k = make(kViolin, s);
+    k.aftertouch(pressure);
+    k.note_on(62, velocity, 1);
+    return run(k, 1.0);
+  };
+  const auto plain = bow(0.7, 0.0), leaning = bow(0.7, 1.0), hard = bow(1.0, 0.0), soft = bow(0.2, 0.0);
+  THEN("leaning draws the bow faster and harder together: at least 4 dB louder");
+  CHECK(rms_db(leaning, 0.5, 0.4) > rms_db(plain, 0.5, 0.4) + 4.0, ::spec::fmt("%.1f dB louder", rms_db(leaning, 0.5, 0.4) - rms_db(plain, 0.5, 0.4)));
+  const auto speaks = [](const std::vector<float>& x) {
+    const auto contour = measure::contour_db(x, kRate, 0.002, 0.004);
+    const double target = rms_db(x, 0.6, 0.3) - 6.0;
+    return static_cast<double>(measure::first_at_or_above(contour, target)) * 2.0;
+  };
+  THEN("a hard key sets the string going sooner than a soft one");
+  CHECK(speaks(hard) + 10.0 < speaks(soft), ::spec::fmt("speaks in %.0f ms against %.0f ms", speaks(hard), speaks(soft)));
+}
+
 SCENARIO(the_whole_instrument_is_stable_with_everything_ringing) {
   GIVEN("every string keyboard with the pedal down and every fourth key struck fortissimo");
   bool all_finite = true, all_decay = true;

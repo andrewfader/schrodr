@@ -274,6 +274,49 @@ auto Sounds(double min_db = -60.0) {
   };
 }
 
+// A tuner's reading every 10 ms over a held note, on 40 ms windows, in Hz: coarse to fine around
+// the note.
+std::vector<double> pitch_track(const Render& r, double from_s) {
+  std::vector<double> out;
+  const size_t window = static_cast<size_t>(0.04 * kRate), hop = static_cast<size_t>(0.01 * kRate);
+  for (size_t at = static_cast<size_t>(from_s * kRate); at + window <= r.note_off; at += hop) {
+    const Span s(r.mono, at, window);
+    const double coarse = peak_hz(s, g_note_hz, 80.0);
+    double best = -1.0, best_hz = coarse;
+    for (double c = -4.0; c <= 4.0; c += 0.25) {
+      const double f = coarse * std::exp2(c / 1200.0), a = measure::tone_amplitude(s, kRate, f);
+      if (a > best) { best = a; best_hz = f; }
+    }
+    out.push_back(best_hz);
+  }
+  return out;
+}
+// How far the pitch swings either side of its mean, in cents: the RMS deviation times sqrt 2,
+// a sine's peak.
+double swing_cents(const std::vector<double>& hz) {
+  double mean = 0.0;
+  for (double f : hz) mean += std::log2(f);
+  mean /= static_cast<double>(hz.size());
+  double sum = 0.0;
+  for (double f : hz) { const double c = 1200.0 * (std::log2(f) - mean); sum += c * c; }
+  return std::sqrt(2.0 * sum / static_cast<double>(hz.size()));
+}
+// Vibrato: steady without it, swinging by `expected` cents with it (once it has come in).
+auto VibratoCents(double expected, double tolerance) {
+  return [=](const Render& a, const Render& b) {
+    const double sa = swing_cents(pitch_track(a, 0.7)), sb = swing_cents(pitch_track(b, 0.7));
+    if (sa > 3.0) return fail("without vibrato the pitch swings %.1f cents", sa);
+    return std::abs(sb - expected) <= tolerance ? ok() : fail("the pitch swings %.1f cents, expected %.1f", sb, expected);
+  };
+}
+// The vibrato's rate: the pitch track's own modulation, in Hz.
+auto VibratoHz(double expected, double tolerance) {
+  return [=](const Render&, const Render& b) {
+    const double hz = measure::modulation_hz(pitch_track(b, 0.7), 0.01, expected * 0.4, expected * 2.0);
+    return std::abs(hz - expected) <= tolerance ? ok() : fail("the pitch swings at %.2f Hz, expected %.2f", hz, expected);
+  };
+}
+
 Context ctx(int instrument, std::vector<Setting> settings = {}, int key = 60) { Context c; c.instrument = instrument; c.settings = std::move(settings); c.key = key; return c; }
 
 std::array<Proof, P::kParamCount> proofs() {
@@ -379,6 +422,20 @@ std::array<Proof, P::kParamCount> proofs() {
   set(kMicPattern, ctx(kGrand, {{kMicDistance, 0.05}}, 33), 0, 1, MoreBass());
   set(kMicSetup, ctx(kGrand, {{kRoomSize, 3}, {kMicDistance, 2.0}}), 0, 1, Narrower());
   set(kPreset, ctx(kGrand), 0, 17, Differs());
+  // the bow and the left hand
+  // More force on the violin's A4 at the same speed: the string grips harder and its corner is
+  // sharper (Schelleng's "brilliant" side of the triangle), the spectrum higher.
+  { Context c = ctx(kViolin, {{kVibrato, 0}}, 69); c.hold_s = 1.2; set(kBowForce, c, 0.2, 1.2, Brighter(1.1)); }
+  // The cello's open D drawn four times as fast: the Helmholtz motion's amplitude follows the
+  // bow's speed (v / beta), ideally 12 dB; at least 5 of it once the body has had its say.
+  { Context c = ctx(kCello, {{kBowForce, 1.5}, {kVibrato, 0}}, 50); c.hold_s = 1.2; set(kBowSpeed, c, 0.1, 0.4, LouderBy(5.0)); }
+  // Where the bow meets the string changes the stroke; the Helmholtz geometry it sets (the bow
+  // slips for its own share of the period) is proved from the model in keyboard_tests.
+  { Context c = ctx(kViolin, {{kVibrato, 0}}, 55); set(kBowPosition, c, 0.1, 0.2, Differs()); }
+  // 20 cents of vibrato on the violin's A4, read off a tuner every 10 ms once it has come in.
+  { Context c = ctx(kViolin, {}, 69); c.hold_s = 2.0; set(kVibrato, c, 0, 20, VibratoCents(20.0, 5.0)); }
+  // The vibrato at 7 Hz: each note's own rate is within 5 % of it.
+  { Context c = ctx(kViolin, {{kVibrato, 20}}, 69); c.hold_s = 2.5; set(kVibratoRate, c, 4.0, 7.0, VibratoHz(7.0, 0.6)); }
   return t;
 }
 

@@ -22,9 +22,10 @@ inline std::vector<PageSpec> schrodr_pages() {
        {{"Instrument", 0, {menu(kInstrument, 3), knob(kMasterDb), knob(kDynamics), knob(kTranspose)}},
         {"Tuning", 1, {knob(kPitchA4), menu(kTemperament, 2), menu(kTemperamentRoot, 2), knob(kStretch), knob(kUnisonSpread)}},
         {"Stereo", 2, {knob(kStereoWidth), knob(kPerspective)}}}},
-      {"ACTION", "Hammers, plectra, tangents and the wheel: what strikes, plucks, presses or bows the strings", theme::orange, 3, 168,
+      {"ACTION", "Hammers, plectra, tangents, the wheel and the bow: what strikes, plucks, presses or bows the strings", theme::orange, 3, 168,
        {{"Hammer and plectrum", 0, {knob(kHammerHardness), knob(kStrikePoint), knob(kPlectrum)}},
         {"Keys and dampers", 1, {knob(kMechanics), knob(kRelease), knob(kBebung)}},
+        {"Bow and left hand", 1, {knob(kBowForce), knob(kBowSpeed), knob(kBowPosition), knob(kVibrato), knob(kVibratoRate)}},
         {"Wheel", 2, {knob(kWheelSpeed), knob(kWheelPressure), knob(kTrompette), toggle(kDrones)}}}},
       {"STOPS", "A harpsichord's registers and an organ's stops, wind and tremulant", theme::green, 3, 150,
        {{"Registers", 0, {toggle(kBack8), toggle(kFront8), toggle(kFour), toggle(kLute), toggle(kBuff)}},
@@ -61,6 +62,10 @@ inline const char* schrodr_short_name(int id) {
     case kMicPattern: return "Pattern";
     case kMicSetup: return "Setup";
     case kStereoWidth: return "Width";
+    case kBowForce: return "Force";
+    case kBowSpeed: return "Speed";
+    case kBowPosition: return "Position";
+    case kVibratoRate: return "Vib rate";
     default: return nullptr;
   }
 }
@@ -77,12 +82,14 @@ inline bool param_relevant_for_instrument(int id, int instrument) {
   using namespace schrodr::params;
   const bool strings = is_string_instrument(instrument), bars = is_bar_instrument(instrument), organ = is_organ(instrument);
   const bool hammered = is_hammered(instrument) || bars, plucked = is_harpsichord(instrument), tangent = is_clavichord(instrument), bowed = is_bowed(instrument);
+  const bool wheel = is_wheel(instrument), violin = is_violin_family(instrument);
   switch (id) {
     case kHammerHardness: return hammered;
     case kStrikePoint: return hammered && !bars;
     case kPlectrum: return plucked;
     case kBebung: return tangent;
-    case kWheelSpeed: case kWheelPressure: return bowed;
+    case kWheelSpeed: case kWheelPressure: return wheel;
+    case kBowForce: case kBowSpeed: case kBowPosition: case kVibrato: case kVibratoRate: return violin;
     case kTrompette: case kDrones: return instrument == kHurdyGurdy;
     case kBack8: case kFront8: case kFour: case kLute: case kBuff: return plucked;
     case kDiapason8: case kGedackt8: case kPrincipal4: case kFifteenth2: case kQuint: case kWind: case kTremulant: case kTremulantRate: case kChiff: return organ;
@@ -91,10 +98,10 @@ inline bool param_relevant_for_instrument(int id, int instrument) {
     case kUnaCorda: return instrument == kGrand || instrument == kUpright || instrument == kFortepiano || instrument == kCristofori;
     case kModerator: return instrument == kFortepiano || instrument == kSquare || instrument == kTangent;
     case kSympathetic: return strings && !bowed;
-    case kLid: return strings;
-    case kStretch: case kUnisonSpread: return strings;
-    case kRelease: return !organ && !bowed;
-    case kMechanics: return !organ;
+    case kLid: return strings && !violin;
+    case kStretch: case kUnisonSpread: return strings && !violin;
+    case kRelease: return !organ && !wheel;
+    case kMechanics: return !organ && !violin;
     default: return true;
   }
 }

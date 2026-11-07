@@ -541,7 +541,7 @@ void on_main_thread(const clap_plugin_t* plugin) {
 const char* kFeatures[] = {CLAP_PLUGIN_FEATURE_INSTRUMENT, CLAP_PLUGIN_FEATURE_SYNTHESIZER, CLAP_PLUGIN_FEATURE_STEREO, nullptr};
 const clap_plugin_descriptor_t kDescriptor{
     CLAP_VERSION_INIT, "org.schrodr.schrodr", "SCHRODR", "SCHRODR contributors",
-    "", "", "", SCHRODR_VERSION, "Keyboard instruments from their physics: pianos, harpsichords, clavichords, bars and pipes", kFeatures};
+    "", "", "", SCHRODR_VERSION, "Keyboard instruments from their physics: pianos, harpsichords, clavichords, bowed strings, bars and pipes", kFeatures};
 
 const clap_plugin_t* create_plugin(const clap_host_t* host) {
   auto* p = new (std::nothrow) Plugin;
