@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.20)
-project(SCHRODR VERSION 0.2.0 LANGUAGES CXX)
+project(SCHRODR VERSION 0.3.0 LANGUAGES CXX)
 
 # Keep windows.h from defining the min/max macros no matter which header pulls it in.
 add_compile_definitions($<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>)
@@ -107,6 +107,9 @@ schrodr_test(bars_tests)
 schrodr_test(pipes_tests)
 schrodr_test(air_tests)
 schrodr_test(engine_tests)
+# SCHRODR's notes against real recordings, from the numbers in tests/reference_data.hpp.
+schrodr_test(reference_tests)
+set_tests_properties(reference_tests PROPERTIES TIMEOUT 1800)
 
 # Suites that load the built .clap and drive it through the public CLAP interfaces, as a host does.
 function(schrodr_plugin_test name)
@@ -144,6 +147,14 @@ target_compile_features(schrodr-note-render PRIVATE cxx_std_20)
 target_include_directories(schrodr-note-render PRIVATE src tests)
 target_link_libraries(schrodr-note-render PRIVATE schrodr_core)
 schrodr_warnings(schrodr-note-render)
+
+# Measures the reference recordings (fetched by tools/fetch_references.py) and writes their
+# numbers into tests/reference_data.hpp; a review tool, not a test.
+add_executable(schrodr-reference-extract tools/reference_extract.cpp)
+target_compile_features(schrodr-reference-extract PRIVATE cxx_std_20)
+target_include_directories(schrodr-reference-extract PRIVATE src tests)
+target_link_libraries(schrodr-reference-extract PRIVATE schrodr_core)
+schrodr_warnings(schrodr-reference-extract)
 
 if(SCHRODR_EDITOR AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
   # The plug-in side of the editor (host, gestures, relevance, artwork) compiled with the plug-in

@@ -3,6 +3,8 @@
 // without a library dependency.
 #pragma once
 
+#include <algorithm>
+#include <cmath>
 #include <cstdint>
 #include <cstdio>
 #include <cstring>
@@ -68,6 +70,62 @@ inline bool parse(const std::vector<uint8_t>& bytes, Audio& out, std::string* er
   return true;
 }
 
+inline uint32_t be32(const uint8_t* p) { return (static_cast<uint32_t>(p[0]) << 24) | (p[1] << 16) | (p[2] << 8) | p[3]; }
+inline uint16_t be16(const uint8_t* p) { return static_cast<uint16_t>((p[0] << 8) | p[1]); }
+
+// Parses an AIFF (or uncompressed AIFF-C) image: big-endian 8/16/24/32-bit PCM, the rate as an
+// 80-bit extended float. The reference recordings (tests/reference) come as AIFF.
+inline bool parse_aiff(const std::vector<uint8_t>& bytes, Audio& out, std::string* error = nullptr) {
+  const auto fail = [&](const char* why) { if (error) *error = why; return false; };
+  if (bytes.size() < 12 || std::memcmp(bytes.data(), "FORM", 4) ||
+      (std::memcmp(bytes.data() + 8, "AIFF", 4) && std::memcmp(bytes.data() + 8, "AIFC", 4)))
+    return fail("not an AIFF file");
+  size_t at = 12;
+  uint16_t channels = 0, bits = 0;
+  double rate = 0.0;
+  const uint8_t* data = nullptr;
+  size_t data_size = 0;
+  while (at + 8 <= bytes.size()) {
+    const uint32_t size = be32(bytes.data() + at + 4);
+    const uint8_t* body = bytes.data() + at + 8;
+    const size_t available = std::min<size_t>(size, bytes.size() - at - 8);
+    if (!std::memcmp(bytes.data() + at, "COMM", 4)) {
+      if (available < 18) return fail("short COMM chunk");
+      channels = be16(body); bits = be16(body + 6);
+      const int exponent = ((body[8] & 0x7f) << 8 | body[9]) - 16383;
+      uint64_t mantissa = 0;
+      for (int i = 0; i < 8; ++i) mantissa = (mantissa << 8) | body[10 + i];
+      rate = std::ldexp(static_cast<double>(mantissa), exponent - 63);
+      if (available >= 22 && !std::memcmp(bytes.data() + 8, "AIFC", 4) && std::memcmp(body + 18, "NONE", 4))
+        return fail("compressed AIFF-C");
+    } else if (!std::memcmp(bytes.data() + at, "SSND", 4)) {
+      if (available < 8) return fail("short SSND chunk");
+      const uint32_t offset = be32(body);
+      data = body + 8 + offset; data_size = available - 8 - std::min<size_t>(offset, available - 8);
+    }
+    at += 8 + size + (size & 1);
+  }
+  if (!data || !channels || rate <= 0.0) return fail("missing COMM or SSND chunk");
+  if (!(bits == 8 || bits == 16 || bits == 24 || bits == 32)) return fail("unsupported bit depth");
+  const size_t sample_bytes = bits / 8, frame_bytes = channels * sample_bytes;
+  const size_t frames = data_size / frame_bytes;
+  out.mono.assign(frames, 0.0f);
+  out.rate = rate;
+  out.source_channels = channels;
+  for (size_t f = 0; f < frames; ++f) {
+    double sum = 0.0;
+    for (uint16_t c = 0; c < channels; ++c) {
+      const uint8_t* s = data + f * frame_bytes + c * sample_bytes;
+      int32_t v = 0;
+      for (size_t b = 0; b < sample_bytes; ++b) v = static_cast<int32_t>(static_cast<uint32_t>(v) << 8 | s[b]);
+      v = static_cast<int32_t>(static_cast<uint32_t>(v) << (32 - bits));  // sign from the top bit
+      sum += v / 2147483648.0;
+    }
+    out.mono[f] = static_cast<float>(sum / channels);
+  }
+  return true;
+}
+
 inline bool read_file(const char* path, Audio& out, std::string* error = nullptr) {
   std::FILE* f = std::fopen(path, "rb");
   if (!f) { if (error) *error = "cannot open file"; return false; }
@@ -76,6 +134,7 @@ inline bool read_file(const char* path, Audio& out, std::string* error = nullptr
   size_t n;
   while ((n = std::fread(chunk, 1, sizeof(chunk), f)) > 0) bytes.insert(bytes.end(), chunk, chunk + n);
   std::fclose(f);
+  if (bytes.size() >= 4 && !std::memcmp(bytes.data(), "FORM", 4)) return parse_aiff(bytes, out, error);
   return parse(bytes, out, error);
 }
 

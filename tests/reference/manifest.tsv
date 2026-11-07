@@ -1,0 +1,198 @@
+# Reference recordings, never committed: tools/fetch_references.py fetches each into a local
+# cache and schrodr-reference-extract measures it. Columns: id, instrument, MIDI key (the note
+# that sounds), dynamic, SOURCE:PATH (the sources are listed, with their pins, in
+# tools/fetch_references.py), sha256, and the true sample rate where the file's header is wrong
+# (else -). Sources: University of Iowa Musical Instrument Samples (Lawrence Fritts, "may be
+# downloaded and used for any projects, without restrictions"); VSCO-2 CE and VCSL (CC0);
+# Sonatina Symphonic Orchestra (CC0); jRhodes3d; the University of Edinburgh's DataShare;
+# Freesound previews.
+# The 2012 Iowa viola files say 44.1 kHz but every note in them sounds 0.459 (44100/96000) of its
+# name, its fundamental A4 at 202.9 Hz and G3 at 90.1 Hz: they are the 96 kHz takes.
+# The Edinburgh clavichord is pitched at A = 415: a file named C4 sounds B3 and is keyed 59. Its
+# names' second and third fields are an automatic pitch detector's guesses, often wrong. The
+# noise-reduced takes are used (the others stand under 25 dB over the museum's air conditioning),
+# and only those holding one note at the pitch their name says.
+# The VCSL and VSCO note names put middle C at C3 (VCSL) and C4 (VSCO); the keys were checked by
+# measurement. The organ rows are the Renaissance organ's stopped 8' (odd harmonics strong).
+# The toy piano's lowest file, freesound 70718, sounds 355 Hz: F4 29 cents sharp, keyed 65.
+# Celesta "soft" and "hard" are marked mf and ff; jRhodes3d's velocity layers 1, 3 and 5 pp, mf
+# and ff (neither instrument's dynamics is judged).
+# Left out because the note stands less than 25 dB over the recording's noise floor: upright C3
+# and C7 at pp, the organ's C2, and (quiet takes over the 16-bit chain's floor) grand_C7_pp, violin_G3_pp, violin_G3_mf, violin_B3_pp,
+# violin_E5_pp, viola_C3_pp, viola_E3_pp, viola_G3_pp, viola_A4_pp, glockenspiel_C6_pp,
+# glockenspiel_C6_mf, glockenspiel_G6_pp, glockenspiel_C7_pp.
+# Left out: the celesta's E7 (it sounds 41 cents sharp) and G#7 (not found within 40 cents of
+# its key). Left out because it is another note: Piano.ff.B0.aiff sounds C1, its partials on F = 32.40 Hz
+# with B = 2.63e-4 exactly as Piano.ff.C1.aiff's (B0 is 30.87 Hz; the pp and mf B0 read 30.64).
+grand_B0_pp	grand	23	pp	iowa:Piano_Other/piano/Piano.pp.B0.aiff	3089ed5e1a1cf5f22363df0a81d78e7df0ab799de7393eab67e46fafbb6e1faf	-
+grand_B0_mf	grand	23	mf	iowa:Piano_Other/piano/Piano.mf.B0.aiff	9812b67d929a7a2c84a032629ec2682ef9f683a7f74cba54ca2b189b176caa4e	-
+grand_C2_pp	grand	36	pp	iowa:Piano_Other/piano/Piano.pp.C2.aiff	7ff5b7bd53e73ea7da25129d94a90998256a59aef65560caf8d324d36383a0ed	-
+grand_C2_mf	grand	36	mf	iowa:Piano_Other/piano/Piano.mf.C2.aiff	a794e41d4a1f67265e6e67c1a91ef7e0ea5d85cf9cfebdb772c43c27c355ba5f	-
+grand_C2_ff	grand	36	ff	iowa:Piano_Other/piano/Piano.ff.C2.aiff	647d72cdcc351e25e2f22048f2c04f35b833960af8d6f115f1d88ac220aec1cc	-
+grand_C4_pp	grand	60	pp	iowa:Piano_Other/piano/Piano.pp.C4.aiff	94540df460e6f4b1517d9ae0bb1a1cc5b4b28ffd61106eda3e89475544ee545d	-
+grand_C4_mf	grand	60	mf	iowa:Piano_Other/piano/Piano.mf.C4.aiff	1a7d8ddea94a3639fa58d79ebcc0b09b170b9c324811d2b705f97e278fdefac2	-
+grand_C4_ff	grand	60	ff	iowa:Piano_Other/piano/Piano.ff.C4.aiff	92f65bcbfb326257869017ea88da346bda98285183f13a78394f5d1c83218e0f	-
+grand_C6_pp	grand	84	pp	iowa:Piano_Other/piano/Piano.pp.C6.aiff	8bbf93badcb6ddc82ad0c6ba4681df512cc46a691f8705c129e01060e796618c	-
+grand_C6_mf	grand	84	mf	iowa:Piano_Other/piano/Piano.mf.C6.aiff	897480810c72f06e4fc89cfe555925a344a7413230bd374d374a1796ae88acee	-
+grand_C6_ff	grand	84	ff	iowa:Piano_Other/piano/Piano.ff.C6.aiff	3c01f95dc0474531fd21db5294399a4568338fb953de9fbebd33d816772e3a17	-
+grand_C7_mf	grand	96	mf	iowa:Piano_Other/piano/Piano.mf.C7.aiff	dc6dbb6fde60ac3349330285a5467cc7a045d246615c713d96c409fe0ea5ada7	-
+grand_C7_ff	grand	96	ff	iowa:Piano_Other/piano/Piano.ff.C7.aiff	b2c65f8508d53c9c8c2122cfa1ba08a08e96ec0f69e5f47ae980a599c2413d42	-
+violin_G3_ff	violin	55	ff	iowa:Strings/violin2012/Violin.arco.ff.sulG.G3B3.mono.aif	62bc88d88bbb449a611732732c776b4a7d2d66e0b5645fd2c48952b074413cae	-
+violin_B3_mf	violin	59	mf	iowa:Strings/violin2012/Violin.arco.mf.sulG.G3B3.mono.aif	87ad84228a6f8b6619586bc4378781ff743fd9786cffc25de943a60306670acc	-
+violin_B3_ff	violin	59	ff	iowa:Strings/violin2012/Violin.arco.ff.sulG.G3B3.mono.aif	62bc88d88bbb449a611732732c776b4a7d2d66e0b5645fd2c48952b074413cae	-
+violin_D4_pp	violin	62	pp	iowa:Strings/violin2012/Violin.arco.pp.sulD.D4B4.mono.aif	3c69ca7e2a3126ec237d3a9eadf40dde4b75fdef69ca3929d53b25e55a4363c4	-
+violin_D4_mf	violin	62	mf	iowa:Strings/violin2012/Violin.arco.mf.sulD.D4B4.mono.aif	67fa9c3e3c7b4b14cf94fe9eb5bb9d0be9a40a154f9a4aadb412beccaa7e8bd5	-
+violin_D4_ff	violin	62	ff	iowa:Strings/violin2012/Violin.arco.ff.sulD.D4B4.mono.aif	55a567ff71d94765aa7f82126dfca9eb240ae447ea23b63c9a44b1acea8059d1	-
+violin_A4_pp	violin	69	pp	iowa:Strings/violin2012/Violin.arco.pp.sulA.A4B5.mono.aif	e60e4b2778148871405d55629da69f68cf148a761e09d66545b9557c6d89cb32	-
+violin_A4_mf	violin	69	mf	iowa:Strings/violin2012/Violin.arco.mf.sulA.A4B4.mono.aif	66783171f197e0d74e2b88c74343b6f3573efed45054426c67702444c4ab60ac	-
+violin_A4_ff	violin	69	ff	iowa:Strings/violin2012/Violin.arco.ff.sulA.A4B4.mono.aif	08e874b2cf3f974d7d0dc6c3a85a9180e6f67ec5f01b551a2f87f7a4f072680c	-
+violin_C5_pp	violin	72	pp	iowa:Strings/violin2012/Violin.arco.pp.sulA.A4B5.mono.aif	e60e4b2778148871405d55629da69f68cf148a761e09d66545b9557c6d89cb32	-
+violin_C5_mf	violin	72	mf	iowa:Strings/violin2012/Violin.arco.mf.sulA.C5B5.mono.aif	d1ae84972057318abb76e0403ec6edb533d11fbf31136d489d08207e12cd4eb6	-
+violin_C5_ff	violin	72	ff	iowa:Strings/violin2012/Violin.arco.ff.sulA.C5B5.mono.aif	a8a599532e9bb5727bcf79c552ba82c482e01f3c5a1857f351eb79e3b8b80ed9	-
+violin_E5_mf	violin	76	mf	iowa:Strings/violin2012/Violin.arco.mf.sulE.E5B5.mono.aif	45fffe125464476c22b818e006ddb4056ebbe92f34b36280b7b184051172f121	-
+violin_E5_ff	violin	76	ff	iowa:Strings/violin2012/Violin.arco.ff.sulE.E5B5.mono.aif	4a2c98e671c50fbf68f46cadfd3cdf2604fcaa52abe714957d6e71d35f3f931b	-
+viola_C3_mf	viola	48	mf	iowa:Strings/viola2012/Viola.arco.sulC.mf.C3B3.mono.aif	c686f2dc710ab65e2dc0619af7295a8b1e97c17ade8efc7de11a4fc21829c0ab	96000
+viola_C3_ff	viola	48	ff	iowa:Strings/viola2012/Viola.arco.sulC.ff.C3B3.mono.aif	a22dd0c7318f9d2de35e8ed113e5d6d4981ef8bba3bcbe3aab456270316c9736	96000
+viola_E3_mf	viola	52	mf	iowa:Strings/viola2012/Viola.arco.sulC.mf.C3B3.mono.aif	c686f2dc710ab65e2dc0619af7295a8b1e97c17ade8efc7de11a4fc21829c0ab	96000
+viola_E3_ff	viola	52	ff	iowa:Strings/viola2012/Viola.arco.sulC.ff.C3B3.mono.aif	a22dd0c7318f9d2de35e8ed113e5d6d4981ef8bba3bcbe3aab456270316c9736	96000
+viola_G3_mf	viola	55	mf	iowa:Strings/viola2012/Viola.arco.sulG.mf.G3B3.mono.aif	8c54a66f30f6b180d10876c997e7b448a691adf3356b091c88000684034980ce	96000
+viola_G3_ff	viola	55	ff	iowa:Strings/viola2012/Viola.arco.sulG.ff.G3B3.mono.aif	3fa603737eca0118b01e6c66cf1450cfbb8e8a798cef113eea60b742a8d8580f	96000
+viola_D4_pp	viola	62	pp	iowa:Strings/viola2012/Viola.arco.sulD.pp.D4B4.mono.aif	172efc09091aa2bfadddc900900a08f1fe73d9b27f37f2aa1eaa8ebddb892860	96000
+viola_D4_mf	viola	62	mf	iowa:Strings/viola2012/Viola.arco.sulD.mf.D4B4.mono.aif	adbb5bb09b15f803f59cd9661748046e68a8709ff7f97f5b533821ed3615ee66	96000
+viola_D4_ff	viola	62	ff	iowa:Strings/viola2012/Viola.arco.sulD.ff.D4B4.mono.aif	153651f1d1d38e3ca9c8b566d813fedb06c488f0e60da521ddd5a20a2f8b2238	96000
+viola_A4_mf	viola	69	mf	iowa:Strings/viola2012/Viola.arco.sulA.mf.A4B4.mono.aif	177fbf375b272ba5495f74deaa457cac99eb03cad71bbdfc0eb1ad39c47ac98e	96000
+viola_A4_ff	viola	69	ff	iowa:Strings/viola2012/Viola.arco.sulA.ff.A4B4.mono.aif	704260bc8bec42f30d2262cc86ccb3d6f4068b83f04b6c749fa110eab424e596	96000
+cello_C2_pp	cello	36	pp	iowa:Strings/cello2012/Cello.arco.pp.sulC.C2B2.mono.aif	ee5a33c1143853ee90d0e083707a63630f84ea9adb1395a244737fc2a873f4f5	-
+cello_C2_mf	cello	36	mf	iowa:Strings/cello2012/Cello.arco.mf.sulC.C2B2.mono.aif	5b9d83f237ded2219de59e909212b97c8b8ca5fcb1930fca95d9b23bebb807ec	-
+cello_C2_ff	cello	36	ff	iowa:Strings/cello2012/Cello.arco.ff.sulC.C2B2.mono.aif	8577af849908801594592ec3c0e04511c46e0d97bd338f8e619e8ea51bbd3ee0	-
+cello_E2_pp	cello	40	pp	iowa:Strings/cello2012/Cello.arco.pp.sulC.C2B2.mono.aif	ee5a33c1143853ee90d0e083707a63630f84ea9adb1395a244737fc2a873f4f5	-
+cello_E2_mf	cello	40	mf	iowa:Strings/cello2012/Cello.arco.mf.sulC.C2B2.mono.aif	5b9d83f237ded2219de59e909212b97c8b8ca5fcb1930fca95d9b23bebb807ec	-
+cello_E2_ff	cello	40	ff	iowa:Strings/cello2012/Cello.arco.ff.sulC.C2B2.mono.aif	8577af849908801594592ec3c0e04511c46e0d97bd338f8e619e8ea51bbd3ee0	-
+cello_G2_pp	cello	43	pp	iowa:Strings/cello2012/Cello.arco.pp.sulG.G2Gb3.mono.aif	ab0bc555e84c25d1a8c8c8a47df6bf097e28d5ce30b1186be733e0f2e61f1355	-
+cello_G2_mf	cello	43	mf	iowa:Strings/cello2012/Cello.arco.mf.sulG.G2Gb3.mono.aif	7ba56e3e3b02cde623d18327dc94f2a09f84c1874ff6e7ce7724034d9844171a	-
+cello_G2_ff	cello	43	ff	iowa:Strings/cello2012/Cello.arco.ff.sulG.G2Gb3.mono.aif	10e8839ab53904318ddb77897f49083553a2e42ab7fb31b9663120b0726661ca	-
+cello_D3_pp	cello	50	pp	iowa:Strings/cello2012/Cello.arco.pp.sulD.D3Db4.mono.aif	9f52635af8d90d275d8385fd2c80114add13251c8a17f7faffe0fa668a1543fd	-
+cello_D3_mf	cello	50	mf	iowa:Strings/cello2012/Cello.arco.mf.sulD.D3Db4.mono.aif	1b2b3e598d9481e20aa5a937371297beb105c2c0a84cc946f8f54bae6f0450fa	-
+cello_D3_ff	cello	50	ff	iowa:Strings/cello2012/Cello.arco.ff.sulD.D3Db4.mono.aif	a609b5e0bb64081824717ac15760e21b8d5570a64031406792cafc8e80cbd273	-
+cello_A3_pp	cello	57	pp	iowa:Strings/cello2012/Cello.arco.pp.sulA.A3Ab4.mono.aif	63a3375bb9324ad0060762d963ed35eced434ee8164d60093f10e0ffe072ca22	-
+cello_A3_mf	cello	57	mf	iowa:Strings/cello2012/Cello.arco.mf.sulA.A3Ab4.mono.aif	4bc5e3aa03a2fbf572512945b1e60faa51f636f9d73bb8330c1a5cfd04d790c6	-
+cello_A3_ff	cello	57	ff	iowa:Strings/cello2012/Cello.arco.ff.sulA.A3Ab4.mono.aif	dadb0f046aa939293f4d452954389f15543640c2b465dd9e42ff5d3ccfef8b49	-
+glockenspiel_C6_ff	glockenspiel	84	ff	iowa:Percussion/Bells/bells.plastic.ff.C6B6.aif	b1f1d701e3151f7c03620041cadfdcfbcdf830aad1b25f52e1f7225819091d79	-
+glockenspiel_G6_mf	glockenspiel	91	mf	iowa:Percussion/Bells/bells.plastic.mf.C6B6.aif	d14f1a0e0e4178d32338b44404ba0b99700523eaecee00cded7feef10a4722c2	-
+glockenspiel_G6_ff	glockenspiel	91	ff	iowa:Percussion/Bells/bells.plastic.ff.C6B6.aif	b1f1d701e3151f7c03620041cadfdcfbcdf830aad1b25f52e1f7225819091d79	-
+glockenspiel_C7_mf	glockenspiel	96	mf	iowa:Percussion/Bells/bells.plastic.mf.C7B7.aif	c8e8c5f61648ffe3e4f674a4ded5e346c7568fc0fc3836f7f75dcca2fefa6dbd	-
+glockenspiel_C7_ff	glockenspiel	96	ff	iowa:Percussion/Bells/bells.plastic.ff.C7B7.aif	2abacdfb19216c3fd2439a88b2178533c84252689d93084ede44158b03d22be3	-
+upright_C1_pp	upright	24	pp	vsco:Keys/Upright Nr1/UR1_C1_pp_RR1.wav	d87f1dbcd78214add28deca01df6c513176a894a7509b02c30b62be055fad22d	-
+upright_C1_mf	upright	24	mf	vsco:Keys/Upright Nr1/UR1_C1_mf_RR2.wav	27ebfc57cdf9a4a4a956f91ba338c093619972c99a57d0663bc1452f16c91329	-
+upright_C1_f	upright	24	f	vsco:Keys/Upright Nr1/UR1_C1_f_RR1.wav	f464d6aa2c7055b5db59574288ec617d0f262014e35180bd2f0a8df3cff58a3a	-
+upright_C2_pp	upright	36	pp	vsco:Keys/Upright Nr1/UR1_C2_pp_RR1.wav	965d05d098e65226bfebbfff2951aa649d527c4a90545e6437e8ced9d703de08	-
+upright_C2_mf	upright	36	mf	vsco:Keys/Upright Nr1/UR1_C2_mf_RR1.wav	2c865da6c7e27d5e8cbffcc1394ddaccf06f3c4513a184d65d08e33b72bdc160	-
+upright_C2_f	upright	36	f	vsco:Keys/Upright Nr1/UR1_C2_f_RR1.wav	03cb58c95040d16a4b5b8cb018372e55f80ca1e44c122df165af1cdf524a6e59	-
+upright_C3_mf	upright	48	mf	vsco:Keys/Upright Nr1/UR1_C3_mf_RR1.wav	4b14e4babc7acab16fb8cafe6c286e347a99437c217bed5e125fc56c316b1579	-
+upright_C3_f	upright	48	f	vsco:Keys/Upright Nr1/UR1_C3_f_RR1.wav	385249d5d2e5c2696cc29d0bc2f35f072ad88939545bc3b38793be98a324a7af	-
+upright_C4_pp	upright	60	pp	vsco:Keys/Upright Nr1/UR1_C4_pp_RR1.wav	0354bf405b644eb16b0d1223e304de93b4abef4e2191c552665563784d40f1ea	-
+upright_C4_mf	upright	60	mf	vsco:Keys/Upright Nr1/UR1_C4_mf_RR1.wav	9f3a820c2ccbfb60209ff21ab8e80082d6bb7f09f7ff29027380d6cc43c69997	-
+upright_C4_f	upright	60	f	vsco:Keys/Upright Nr1/UR1_C4_f_RR1.wav	c804b8af3109aee316a8e0551ed66e2fdc7861369aebafaa9b872f104f11b8fd	-
+upright_C5_pp	upright	72	pp	vsco:Keys/Upright Nr1/UR1_C5_pp_RR1.wav	e0d5353f67afe55e4d6d49253651f2a8aa0c456603f538175e103769e1e1e73c	-
+upright_C5_mf	upright	72	mf	vsco:Keys/Upright Nr1/UR1_C5_mf_RR1.wav	dacba2dd26c3fd581c093d8131321d2b46fb0f52d5031aad6f173aa7e357b0fb	-
+upright_C5_f	upright	72	f	vsco:Keys/Upright Nr1/UR1_C5_f_RR1.wav	ee5a4568c4be267904908fc7e67ddf284980a8025667d0aee09f3ef39ce8efb6	-
+upright_C6_pp	upright	84	pp	vsco:Keys/Upright Nr1/UR1_C6_pp_RR1.wav	d5c574169167c0a3186bda3a3c721073c4b5435d58357285182e09e18f957ea8	-
+upright_C6_mf	upright	84	mf	vsco:Keys/Upright Nr1/UR1_C6_mf_RR1.wav	425938849f04921dddc5251cfc74f7192d5f6b733ee51e58c4f8dd2cf2c3f547	-
+upright_C6_f	upright	84	f	vsco:Keys/Upright Nr1/UR1_C6_f_RR1.wav	76fa05988e93d40180b70dd65d93cffe185483b73658026f8b5b195ff7aa6567	-
+upright_C7_mf	upright	96	mf	vsco:Keys/Upright Nr1/UR1_C7_mf_RR1.wav	f9849627bc60114353570eb0d2d07800ab3f802fee7b0830568cacef3f21e104	-
+upright_C7_f	upright	96	f	vsco:Keys/Upright Nr1/UR1_C7_f_RR1.wav	11d1ca9691f0202aaf7588ca5435abf34cb96bc4bfd8a06dcb3ebcacee3100ab	-
+celesta_C4_mf	celesta	60	mf	sso:Celeste/celeste-c4-soft.flac	67ba25c09401877e55517824ebf391884e523e5e944639fb5b421bf5d05199d9	-
+celesta_C4_ff	celesta	60	ff	sso:Celeste/celeste-c4-hard.flac	a9c2a5390d77f5eacab3a6e6d2d1730680f3977afe6cb9f9a3afa80884063cb9	-
+celesta_E4_mf	celesta	64	mf	sso:Celeste/celeste-e4-soft.flac	98a507354d3fc60e35f2e8d54333463df36d80fe530a5c79e544e8c4df842384	-
+celesta_E4_ff	celesta	64	ff	sso:Celeste/celeste-e4-hard.flac	7042bc8ae4dfd223098e2cb4828faafb31ddfd5c07a3a79d39a7fa5a1b8345cb	-
+celesta_Gs4_mf	celesta	68	mf	sso:Celeste/celeste-g#4-soft.flac	f6c0c8579e4fa924e2bdb5a52e67cbdfe322a6ed1cfe619ffcabdebd627b5f73	-
+celesta_Gs4_ff	celesta	68	ff	sso:Celeste/celeste-g#4-hard.flac	11eb5ce9fe0eb5274c8cc04c7e27fdb99ab97a4123abb064056eeeb4b49e0eb9	-
+celesta_C5_mf	celesta	72	mf	sso:Celeste/celeste-c5-soft.flac	663e99a1359b528fd8e898610a3f3b1685700ecfdd2a6bb4ece28f4b12422cc3	-
+celesta_C5_ff	celesta	72	ff	sso:Celeste/celeste-c5-hard.flac	4ed5e7f5cf794b73ec92b32151987f740104d6e1ef73faef74fe9c7c5a480e80	-
+celesta_E5_mf	celesta	76	mf	sso:Celeste/celeste-e5-soft.flac	3acd5c53d829da69bc3e9e49565697530bb4d9cf5ad4d8e0ea70b331ee0e6389	-
+celesta_E5_ff	celesta	76	ff	sso:Celeste/celeste-e5-hard.flac	0210341de25c10e5af80d7df52dae18dbe1c0bb423b530fae50341cf214f9bb6	-
+celesta_Gs5_mf	celesta	80	mf	sso:Celeste/celeste-g#5-soft.flac	d2133e44db4a224c42b7d5f1c07beef0fb6f5ed7a18edae3dabeea932c3e23b8	-
+celesta_Gs5_ff	celesta	80	ff	sso:Celeste/celeste-g#5-hard.flac	3301cf1899a40deaacfb057de9b0f72f6efb32fb7adaf82ccfb10b40b45a4698	-
+celesta_C6_mf	celesta	84	mf	sso:Celeste/celeste-c6-soft.flac	8b866cd88e645bd3ad26ed388e1a6419c7eb26c17921ce5c503fa63a39772e06	-
+celesta_C6_ff	celesta	84	ff	sso:Celeste/celeste-c6-hard.flac	94f1589c6709904292979464601960fbb746b9572654607084b4d4daaee14a33	-
+celesta_E6_mf	celesta	88	mf	sso:Celeste/celeste-e6-soft.flac	ca9973c3e76e8ad466ec7029e6bfb3ceadb7f1ccb30f19b8fc003fade286c53d	-
+celesta_E6_ff	celesta	88	ff	sso:Celeste/celeste-e6-hard.flac	a9c6ee5c3adf844d904529715351bc93526a2068d21b8a419896a4bcf50bb098	-
+celesta_Gs6_mf	celesta	92	mf	sso:Celeste/celeste-g#6-soft.flac	f3d7b91d1a143fecd13b7d6375e2c1f8c006e49f353ef3d5a6f36cf4ab363286	-
+celesta_Gs6_ff	celesta	92	ff	sso:Celeste/celeste-g#6-hard.flac	bca657c428182584ed5a04870e2adb99d8da7261ae2e0ac8c343f995180f6e23	-
+celesta_C7_mf	celesta	96	mf	sso:Celeste/celeste-c7-soft.flac	338de1f8042a406ad6435ce513e5c8bbd23feda36ce5761f2cdcbebc8d0daa94	-
+celesta_C7_ff	celesta	96	ff	sso:Celeste/celeste-c7-hard.flac	e91e6e74e1f95ae6e23354d8eaa4f05f4d568b6b89c7b5677eb4b203e0a9b60b	-
+epiano_F1_pp	electric piano	29	pp	jrhodes:jRhodes3d-mono/A_029__F1_1.flac	c4875a604b2cd8e5afdb0d51f1414886f23705a4e4d25fa5382a3d1f342d8b4e	-
+epiano_F1_mf	electric piano	29	mf	jrhodes:jRhodes3d-mono/A_029__F1_3.flac	28a618bacb292c247cda9c093fc62a302fc80b81fba42a6b4144142adb84f38e	-
+epiano_F1_ff	electric piano	29	ff	jrhodes:jRhodes3d-mono/A_029__F1_5.flac	3ecd3c83a8c69b59ce4fd13c09fff0e3739380b93f2a0b33c36351c5244c33d1	-
+epiano_E2_pp	electric piano	40	pp	jrhodes:jRhodes3d-mono/A_040__E2_1.flac	60397dc6310d9d12d2cccc35502b1e1b42785bff554e6f5eee9a6bcdbd5d7a1a	-
+epiano_E2_mf	electric piano	40	mf	jrhodes:jRhodes3d-mono/A_040__E2_3.flac	4bc2f8fc117f499b1ec372ca10b507c8aa4cb677f1b32abb654ec7b0093d9183	-
+epiano_E2_ff	electric piano	40	ff	jrhodes:jRhodes3d-mono/A_040__E2_5.flac	1afb865ef15251e77a998b34631050ab6f0999f6a6b884d678c23eb91fffbf91	-
+epiano_D3_pp	electric piano	50	pp	jrhodes:jRhodes3d-mono/A_050__D3_1.flac	b915a0d085b4cf807197651a5afeec74403702839b0a31cdb26969f663def9a4	-
+epiano_D3_mf	electric piano	50	mf	jrhodes:jRhodes3d-mono/A_050__D3_3.flac	4a53ea8d27ff13ab851d52ed47f4653332c8b58127566816ca66638035e3bdcf	-
+epiano_D3_ff	electric piano	50	ff	jrhodes:jRhodes3d-mono/A_050__D3_5.flac	593cc2903dbf73407022c037b7858ba43dc49a4dabfb721d2379f8fbcc25b920	-
+epiano_B3_pp	electric piano	59	pp	jrhodes:jRhodes3d-mono/A_059__B3_1.flac	d48937d8c50f475fa3d439be6c8ddcdf77b1854fb6b8286dd9730272c553bf94	-
+epiano_B3_mf	electric piano	59	mf	jrhodes:jRhodes3d-mono/A_059__B3_3.flac	2179456a26e63bcb85ecbf41dc66fbc70fa0f9f403903862a4d0c674b4f8f9c0	-
+epiano_B3_ff	electric piano	59	ff	jrhodes:jRhodes3d-mono/A_059__B3_5.flac	8db2454e8a13b8ac65aba92653a65da26ececa72de1211a851812344bd7699a4	-
+epiano_F4_pp	electric piano	65	pp	jrhodes:jRhodes3d-mono/A_065__F4_1.flac	5f9d5c4e5623632a7e31e4d5c9b11bdce30c3eb9d30dabf0cf3bb3d2640c6431	-
+epiano_F4_mf	electric piano	65	mf	jrhodes:jRhodes3d-mono/A_065__F4_3.flac	cc7e32c6215c86625d057d5609b84af85b4ad07913802b9759a4de586781c7b5	-
+epiano_F4_ff	electric piano	65	ff	jrhodes:jRhodes3d-mono/A_065__F4_5.flac	adc117ce81eb550a0f2b98651bd5437277cd4494f127edfa7a8c1ca9bbd423e5	-
+epiano_E5_pp	electric piano	76	pp	jrhodes:jRhodes3d-mono/A_076__E5_1.flac	751204353bcb824d06ffa4a9e61ec64ad21242764d7467115267044143c4a726	-
+epiano_E5_ff	electric piano	76	ff	jrhodes:jRhodes3d-mono/A_076__E5_5.flac	3e6e051e7db242155e6ee148d48e5924f8c923f5efcd8c023c28abdaed8bc6e6	-
+epiano_D6_ff	electric piano	86	ff	jrhodes:jRhodes3d-mono/A_086__D6_5.flac	f9415ac0880734ff1e6d1901b50cb3f7df61bb8146bf867dda4d359e0b6d9278	-
+epiano_C7_ff	electric piano	96	ff	jrhodes:jRhodes3d-mono/A_096__C7_5.flac	3e308dcb2add9ef08a892cdb63e1800f0843f83c12055f394c95309b25bc0d05	-
+flemish_C2	flemish	36	mf	vcsl:Chordophones/Zithers/Harpsichord, Flemish/Sustains/Low/HarpsiRH_Low_Far_C1_rr1.wav	fdae7478a1f703516dca6227170574a43371d81d3aeeb7ee010f0c4b41ef359d	-
+flemish_Fs2	flemish	42	mf	vcsl:Chordophones/Zithers/Harpsichord, Flemish/Sustains/Low/HarpsiRH_Low_Far_F#1_rr1.wav	411a5d188f791dad763db11b70e43c5f98df552eb65154c2d911005fce3e6fde	-
+flemish_C3	flemish	48	mf	vcsl:Chordophones/Zithers/Harpsichord, Flemish/Sustains/Low/HarpsiRH_Low_Far_C2_rr1.wav	aa3618832bd0ad30a596429cbc709fc2b1b9e2c5996f4e0a447e5c045586640c	-
+flemish_Fs3	flemish	54	mf	vcsl:Chordophones/Zithers/Harpsichord, Flemish/Sustains/Low/HarpsiRH_Low_Far_F#2_rr1.wav	81881b168089a81574f5d4922e01b26511c546274d1a46d07ac896dca5b0b6ae	-
+flemish_C4	flemish	60	mf	vcsl:Chordophones/Zithers/Harpsichord, Flemish/Sustains/Low/HarpsiRH_Low_Far_C3_rr1.wav	9b500613abfecb05086919fd79fcb724ac2e1adda1357e34718b0b4c0c5c6824	-
+flemish_Fs4	flemish	66	mf	vcsl:Chordophones/Zithers/Harpsichord, Flemish/Sustains/Low/HarpsiRH_Low_Far_F#3_rr1.wav	45d9522d5c176df15d7dc86f91f925e1bc92b6fc3f365e6a48b0d767939f4a92	-
+flemish_C5	flemish	72	mf	vcsl:Chordophones/Zithers/Harpsichord, Flemish/Sustains/Low/HarpsiRH_Low_Far_C4_rr1.wav	7563cde2ab6f9abfd3e1315bd5d578a8412ab1adf0fb56bcb8a1c5cf3d665539	-
+flemish_As5	flemish	82	mf	vcsl:Chordophones/Zithers/Harpsichord, Flemish/Sustains/Low/HarpsiRH_Low_Far_A#4_rr1.wav	ceebca433b6869cc8c104811aad17744a8b4f2dcb6f8636de430e7244781ca76	-
+italian_Cs2	italian	37	mf	vcsl:Chordophones/Zithers/Harpsichord, Italian/Sustains/stop1/Harpsichord_stop1_C#1_1.wav	6a9b64bc8e4a56ef1fc75924d5ea2607a5af2acd728339e6c9bdd8c089d3dff7	-
+italian_Fs2	italian	42	mf	vcsl:Chordophones/Zithers/Harpsichord, Italian/Sustains/stop1/Harpsichord_stop1_F#1_1.wav	8e59dcdee8d051f66d8bfa99f1a79d9473f3a2fa8cb38776fc59ea388ea41a28	-
+italian_Cs3	italian	49	mf	vcsl:Chordophones/Zithers/Harpsichord, Italian/Sustains/stop1/Harpsichord_stop1_C#2_1.wav	2185b95a845d9f140af7dd468452be3bc2f81fe4fd99192e12caac5cec1a7cc2	-
+italian_Fs3	italian	54	mf	vcsl:Chordophones/Zithers/Harpsichord, Italian/Sustains/stop1/Harpsichord_stop1_F#2_1.wav	236a84022db9a7dced0246dbd47ace20b7039ad0fad04d7a17d28bd7aeaec103	-
+italian_Cs4	italian	61	mf	vcsl:Chordophones/Zithers/Harpsichord, Italian/Sustains/stop1/Harpsichord_stop1_C#3_1.wav	cd378300a0145fbcb20d04dded53a92848752c49b0ad570c0860b2dfe211ef20	-
+italian_Fs4	italian	66	mf	vcsl:Chordophones/Zithers/Harpsichord, Italian/Sustains/stop1/Harpsichord_stop1_F#3_1.wav	4c0d89c0ca83fd770120208615428c6f1f9dee0e9f42f18f2bc87bf54a0fb903	-
+italian_Cs5	italian	73	mf	vcsl:Chordophones/Zithers/Harpsichord, Italian/Sustains/stop1/Harpsichord_stop1_C#4_1.wav	a72dbf8de018aae9cc9a61528f9797a43eb7a8949776c7231f6e1aa50acbd634	-
+italian_Fs5	italian	78	mf	vcsl:Chordophones/Zithers/Harpsichord, Italian/Sustains/stop1/Harpsichord_stop1_F#4_1.wav	7ce5a304d14baf006a9842db45a7c703eabd3e04a765593110793483db4cc097	-
+italian_B5	italian	83	mf	vcsl:Chordophones/Zithers/Harpsichord, Italian/Sustains/stop1/Harpsichord_stop1_B4_1.wav	0fab46c79a028a6c45e30f6458ec1daba735efa24782e898c977d4b83e3dce19	-
+french_C2	french	36	mf	vcsl:Chordophones/Zithers/Harpsichord, French/Sustains/Harpsi2_Normal_C1_rr1_Main.wav	251bdc793c94771f99a736b5c7946da6278535f9e614c3b9fe58a965dfd0d774	-
+french_Fs2	french	42	mf	vcsl:Chordophones/Zithers/Harpsichord, French/Sustains/Harpsi2_Normal_F#1_rr1_Main.wav	f65ebd89ff31eb0664c0d1d31c18e30ce68718227470ed9062a957b20325f185	-
+french_C3	french	48	mf	vcsl:Chordophones/Zithers/Harpsichord, French/Sustains/Harpsi2_Normal_C2_rr1_Main.wav	9859e034d9e59dd7f3878e4bd52f05263b2780f5b697c7d87881ad8f880be98f	-
+french_Fs3	french	54	mf	vcsl:Chordophones/Zithers/Harpsichord, French/Sustains/Harpsi2_Normal_F#2_rr1_Main.wav	27a5c43fa40e83a26ba4bbe8e7d00a8a593adb4f219cbed369447a18bb835135	-
+french_C4	french	60	mf	vcsl:Chordophones/Zithers/Harpsichord, French/Sustains/Harpsi2_Normal_C3_rr1_Main.wav	cda5d21cdf4581517933859b8557e32745b5115ba243f63fef757fee025390de	-
+french_Fs4	french	66	mf	vcsl:Chordophones/Zithers/Harpsichord, French/Sustains/Harpsi2_Normal_F#3_rr1_Main.wav	d772b155098456ab2ba771b712ab5aa56c95f6b650fe5e4316d591162fbdb6a0	-
+french_C5	french	72	mf	vcsl:Chordophones/Zithers/Harpsichord, French/Sustains/Harpsi2_Normal_C4_rr1_Main.wav	57b13d0ce01a8ad50c09ad1d7ecda3df1298c73ab9dc49988fbdf9dc2ce277a5	-
+french_Fs5	french	78	mf	vcsl:Chordophones/Zithers/Harpsichord, French/Sustains/Harpsi2_Normal_F#4_rr1_Main.wav	c921aa5d861c8e1429fae1b03b7ebe93883258f85bd13515c2d6e08e5a126f0a	-
+organ_Fs2	organ	42	mf	vcsl:Aerophones/Edge-blown Aerophones/Renaissance Organ/8'/RenOrgan_8foot_Room_F#1_rr1.wav	29d09e17a170f758be8896066922c9d238d6254604896400eadefc93ce634e77	-
+organ_C3	organ	48	mf	vcsl:Aerophones/Edge-blown Aerophones/Renaissance Organ/8'/RenOrgan_8foot_Room_C2_rr1.wav	c70dd11e9ad2a61868fa456c9ddc0795ac82ebb83a851ef2730e99f8eb0b0b1f	-
+organ_Fs3	organ	54	mf	vcsl:Aerophones/Edge-blown Aerophones/Renaissance Organ/8'/RenOrgan_8foot_Room_F#2_rr1.wav	4dbf39e2af28b1c23a1f9e359e842853fbb5f16054d863f519e5a0b40223ea0a	-
+organ_C4	organ	60	mf	vcsl:Aerophones/Edge-blown Aerophones/Renaissance Organ/8'/RenOrgan_8foot_Room_C3_rr1.wav	90e36226d3448f39800afd68aad68f1902cb280899430789cb77d1ab93bdbb34	-
+organ_Fs4	organ	66	mf	vcsl:Aerophones/Edge-blown Aerophones/Renaissance Organ/8'/RenOrgan_8foot_Room_F#3_rr1.wav	8ccd5c0dedd57cea3487c260062faf835512f5f1bb7c09040444bbd9a8931c94	-
+organ_C5	organ	72	mf	vcsl:Aerophones/Edge-blown Aerophones/Renaissance Organ/8'/RenOrgan_8foot_Room_C4_rr1.wav	7681f5c04c3c1e04c0bf089582a6e91b5aa40cfdcb020c568c6bffe4249ef7dc	-
+organ_Fs5	organ	78	mf	vcsl:Aerophones/Edge-blown Aerophones/Renaissance Organ/8'/RenOrgan_8foot_Room_F#4_rr1.wav	ace6ddc280df1badc7709fb81b474d56f5e634d649689f350cf321541f27513c	-
+organ_C6	organ	84	mf	vcsl:Aerophones/Edge-blown Aerophones/Renaissance Organ/8'/RenOrgan_8foot_Room_C5_rr1.wav	6c157740d810c68b14bd08d69f77d8fd2d879fa901d9811985ac35e293793987	-
+toy_F4	toy piano	65	ff	freesound:70/70718_1031833-hq.ogg	b41e8e11df34f328e6681e42d017d968bbeeefc95f11c9f7176bf1d5f9bb5e88	-
+toy_G4	toy piano	67	ff	freesound:70/70719_1031833-hq.ogg	220a96aade104442453197bea4c6dee6b0ac61ec41686f06880b3160f5f46208	-
+toy_Gs4	toy piano	68	ff	freesound:70/70720_1031833-hq.ogg	20db2ea5bd7765c1fb7cf074dbc39f3d7933aa8085ae39eb5b5abbfb2be8d6a8	-
+toy_A4	toy piano	69	ff	freesound:70/70721_1031833-hq.ogg	14abf133303968e82525da4477fe8a0811747829480716ac484e24cee891f82a	-
+toy_As4	toy piano	70	ff	freesound:70/70722_1031833-hq.ogg	e3014301cc6e90e6dd15874d20e3104c8223dc9ae689a729c1acad2c96173ca6	-
+toy_B4	toy piano	71	ff	freesound:70/70723_1031833-hq.ogg	fadaacfe51e4fde7c1577ccac1a22f3d121d4d7552031c47fd503587cae0fda6	-
+toy_C5	toy piano	72	ff	freesound:70/70724_1031833-hq.ogg	f4f8496092e98563e7657db659ed86b8fefca6d5218cc516c04db80c88317505	-
+toy_Cs5	toy piano	73	ff	freesound:70/70725_1031833-hq.ogg	8b0ac1f651bc220c335aad5a9e90ca1abeb82a77c02cc9f00c304c67269374c9	-
+toy_D5	toy piano	74	ff	freesound:70/70726_1031833-hq.ogg	bad096f1d8dcf65679f9fdc4753d191d054ce67712b037af453d825b14fb6b5d	-
+toy_Ds5	toy piano	75	ff	freesound:70/70727_1031833-hq.ogg	e43374a87c618b573761b651a7e6082af242aec938b199425db02bc35a3066f5	-
+toy_E5	toy piano	76	ff	freesound:70/70728_1031833-hq.ogg	b6bf598f1ae314bd6bd0bdc34e9d5a44673aa90b1e3f3a277af741e8f237bbb2	-
+toy_F5	toy piano	77	ff	freesound:70/70729_1031833-hq.ogg	4392846ed850a3bd3c419f9f47981502b33e45c64456b1827132ed834198e1db	-
+clavichord_C2	clavichord	36	mf	clavichord:Unfretted_Clavicord_ca1740s/Unfretted-Clavichord_1740s_noVibrato_noiseReduced/pitches/Cs2_037_C#2_Unfretted-Clavichord_1740s_noVibrato_noiseReduced_seg002.wav	64ddbca74f7518c74cf5aeb234b4814f0af0b5eb49ecd56a3ca37dbb14ecb76c	-
+clavichord_G2	clavichord	43	mf	clavichord:Unfretted_Clavicord_ca1740s/Unfretted-Clavichord_1740s_noVibrato_noiseReduced/pitches/Gs2_044_G#2_Unfretted-Clavichord_1740s_noVibrato_noiseReduced_seg007.wav	f6171dbf384cc669e7985982e1a9f453a0b6bfd253dadcbd76d610d11a056e2a	-
+clavichord_C3	clavichord	48	mf	clavichord:Unfretted_Clavicord_ca1740s/Unfretted-Clavichord_1740s_noVibrato_noiseReduced/pitches/Cs3_049_C#3_Unfretted-Clavichord_1740s_noVibrato_noiseReduced_seg011.wav	caac7b6bdff61e75d227e65f2e9b1745c7777294edf9154bc0106cf1c17cf292	-
+clavichord_Ds3	clavichord	51	mf	clavichord:Unfretted_Clavicord_ca1740s/Unfretted-Clavichord_1740s_noVibrato_noiseReduced/pitches/E3_049_C3_Unfretted-Clavichord_1740s_noVibrato_noiseReduced_seg014.wav	fdcb27992ebb94e48bf95ea1c937f5e07de0f22b98b6923405bae45d6458771a	-
+clavichord_B3	clavichord	59	mf	clavichord:Unfretted_Clavicord_ca1740s/Unfretted-Clavichord_1740s_noVibrato_noiseReduced/pitches/C4_060_C4_Unfretted-Clavichord_1740s_noVibrato_noiseReduced_seg019.wav	fe9499665a0ab4b0b0d2dda1767fd5f9b7957108d31838a8a6a8a8d7f3c2e87f	-
+clavichord_C4	clavichord	60	mf	clavichord:Unfretted_Clavicord_ca1740s/Unfretted-Clavichord_1740s_noVibrato_noiseReduced/pitches/Cs4_042_F#2_Unfretted-Clavichord_1740s_noVibrato_noiseReduced_seg020.wav	66b9c3832449d3563d6cb5c3180c7d2204f7f0aa31ad267e72a6a3fae5cc0584	-
+clavichord_Cs4	clavichord	61	mf	clavichord:Unfretted_Clavicord_ca1740s/Unfretted-Clavichord_1740s_noVibrato_noiseReduced/pitches/D4_050_D3_Unfretted-Clavichord_1740s_noVibrato_noiseReduced_seg021.wav	c9c83b036f424e281b7c8334f06eb4200dc0b0a89373d060c8e9f9c089e02e43	-
+clavichord_As4	clavichord	70	mf	clavichord:Unfretted_Clavicord_ca1740s/Unfretted-Clavichord_1740s_noVibrato_noiseReduced/pitches/B4_052_D3_Unfretted-Clavichord_1740s_noVibrato_noiseReduced_seg029.wav	ce5eed33211482fd11aa76308f41e736976dba2f1bfbfc717f86caeb857ce30e	-
+clavichord_D5	clavichord	74	mf	clavichord:Unfretted_Clavicord_ca1740s/Unfretted-Clavichord_1740s_noVibrato_noiseReduced/pitches/Ds5_075_D#5_Unfretted-Clavichord_1740s_noVibrato_noiseReduced_seg033.wav	8086e94643df71940aba79e97138aa97fa17634aae58aedf882431d40a0b3366	-
+clavichord_Ds5	clavichord	75	mf	clavichord:Unfretted_Clavicord_ca1740s/Unfretted-Clavichord_1740s_noVibrato_noiseReduced/pitches/E5_076_E5_Mixed_Dull_Unfretted-Clavichord_1740s_noVibrato_noiseReduced_seg034.wav	f23482a5a4bd31f40632417c08ac685767c4244cb493a3fa869e551a07967ceb	-
+clavichord_C6	clavichord	84	mf	clavichord:Unfretted_Clavicord_ca1740s/Unfretted-Clavichord_1740s_noVibrato_noiseReduced/pitches/Cs6_085_C#6_Unfretted-Clavichord_1740s_noVibrato_noiseReduced_seg043.wav	f5828d49d1fc1f6be5b0a9dcd7c3428ca94e5792c0db059826a70618dfc77ec9	-

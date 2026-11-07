@@ -16,4 +16,5 @@ this directory, and a test without a scenario is a bug in the test.
 | engine.feature | `engine_tests` |
 | clap_plugin.feature | `plugin_smoke`, `note_tests`, `state_tests` |
 | advertised_parameters.feature | `advertised_tests` |
+| reference_recordings.feature | `reference_tests` |
 | editor.feature | `ui_tests`, `frontend_tests` (Linux) |

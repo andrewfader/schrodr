@@ -85,6 +85,7 @@ hardware, installed plug-ins or the network.
 | `pipes_tests` | every rank on its pitch, the stopped pipe's odd harmonics, the chiff, the tremulant, the stops, the wind, the C and C# sides |
 | `air_tests` | the room and its air against the physics: the speed of sound, ISO 9613-1, Sabine's time, wood moisture, string expansion |
 | `engine_tests` | notes, pedals and controllers, dynamics, the instrument switch, every instrument at a comparable level, every preset against the quality bar, the limiter, the tail |
+| `reference_tests` | 13 of the 25 instruments against recordings of real ones (Iowa MIS, VSCO-2, VCSL, Edinburgh, Sonatina, jRhodes3d, Freesound), note for note: spectral envelope, brightness, dynamics, inharmonicity, decay, overtones, bow noise; known gaps listed with their causes and held from closing silently |
 | `plugin_smoke`, `note_tests`, `state_tests` | the built `.clap` through the public CLAP ABI: discovery, ports, parameters, events at sample offsets, MIDI, presets, state round trips, malformed state |
 | `advertised_tests` | one proof per parameter from audio; fails if a parameter has no proof |
 | `ui_tests` | the real page table and editor against a fake host that enforces gesture rules and a canvas that records drawing |
@@ -93,7 +94,9 @@ hardware, installed plug-ins or the network.
 `build/schrodr-ui-preview <dir>` renders every editor page offscreen on Linux for review,
 `build/schrodr-preset-audit <dir>` renders and measures every preset (see
 [docs/QUALITY.md](docs/QUALITY.md)), `build/schrodr-note-render` renders one note of any
-instrument for listening, and `tools/coverage.py` reports line coverage from a
+instrument for listening, `tools/fetch_references.py` and `build/schrodr-reference-extract`
+fetch and measure the reference recordings (see [docs/QUALITY.md](docs/QUALITY.md)), and
+`tools/coverage.py` reports line coverage from a
 `-DSCHRODR_COVERAGE=ON` build. [AGENTS.md](AGENTS.md) is the verification contract for changes.
 
 ## Layout
