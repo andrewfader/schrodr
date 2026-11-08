@@ -7,7 +7,7 @@ Every page: [INSTRUMENT](docs/screenshots/page1.png), [ACTION](docs/screenshots/
 and the [preset menu](docs/screenshots/presets.png).
 
 SCHRODR is a cross-platform CLAP instrument that simulates keyboard instruments from their
-physics rather than playing samples of them: pianos from Cristofori's to a concert grand,
+physics rather than playing samples of them: pianos from a Cristofori to a concert grand,
 harpsichords, virginals and a clavichord, the hurdy-gurdy and the Geigenwerk, the celesta and
 its cousins, a chamber organ, and a violin, viola and cello played from the keys. It builds on Linux, Windows and macOS with a native editor
 on all three (X11, Win32, Cocoa). It follows the model of [FUZZBOI](https://github.com/andrewfader/fuzzboi): a header-only
@@ -20,7 +20,7 @@ the audio in the unit the claim is made in.
 
 | Instrument | What is simulated |
 |---|---|
-| Concert grand, upright | 88 keys of real strings (a Steinway D's and a Yamaha U1's scalings: lengths, music wire to 1.5 mm then wound cores, tensions near 700 to 950 N), one to three to a note, felt hammers whose force grows as a power of their compression, a soundboard of measured modes, dampers to F#6, una corda, sostenuto and sustain pedals, the lid |
+| Concert grand, upright | 88 keys of real strings (the scalings of a Steinway D and a Yamaha U1: lengths, music wire to 1.5 mm then wound cores, tensions near 700 to 950 N), one to three to a note, felt hammers whose force grows as a power of their compression, a soundboard of measured modes, dampers to F#6, una corda, sostenuto and sustain pedals, the lid |
 | Viennese fortepiano, square piano, Cristofori 1720, tangent piano | the same physics at a tenth of the tension: iron and brass wire, leather, paper or bare wood on the hammers, thin boards, knee levers, the moderator |
 | Flemish, Italian and French harpsichords, virginal, spinet, Lautenwerck | quills or delrin plectra that lift the string and let go at their own deflection (so the key's speed barely matters), separate strings for the back and front 8' and the 4', the lute and buff stops, jack dampers; gut on the Lautenwerck |
 | Fretted and unfretted clavichords | brass tangents that strike and stay, dividing the string; a firm stroke stretches it sharp, aftertouch bends it (bebung); chromatic neighbours share a pair on the fretted one |
@@ -32,7 +32,7 @@ the audio in the unit the claim is made in.
 **The tuner's work**: six temperaments (equal, Pythagorean, quarter-comma meantone,
 Werckmeister III, Kirnberger III, Vallotti) from any key, the reference pitch from 392 to 466 Hz,
 the octaves stretched to each string's own inharmonicity the way a tuner does by ear (the
-Railsback curve emerges from the strings), and unisons left a cent or a saloon's eight apart.
+Railsback curve emerges from the strings), and unisons left a cent apart, or eight for a saloon piano.
 
 **The room and its air**: every instrument plays into a room and is heard through air (ISO
 9613-1 absorption, the speed of sound, image-source reflections, a Sabine tail) by an omni,
