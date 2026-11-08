@@ -81,21 +81,24 @@ inline const std::vector<Preset>& all() {
       {"Viola", {{kInstrument, kViola}, {kRoomSize, 3}, {kMicDistance, 1.5}, {kMasterDb, -15.5}}},
       {"Cello", {{kInstrument, kCello}, {kBowForce, 1.5}, {kRoomSize, 3}, {kMicDistance, 1.5}, {kMasterDb, -17.6}}},
       {"Cello in a hall", {{kInstrument, kCello}, {kBowForce, 1.5}, {kVibrato, 16}, {kVibratoRate, 5}, {kRoomSize, 5}, {kRoomAbsorption, 0.2}, {kMicDistance, 4}, {kMasterDb, -14.7}}},
-      // --- studio sounds, each at an A4 measured from a period record (tape ran where it ran) ----
+      // --- studio sounds. The harpsichords keep the A4 measured from their period records (tape ran
+      //     where it ran, and the instrument is heard at that pitch); the modern instruments play at
+      //     A440, since a record's tape speed is not part of their sound and left them 10 to 25 cents
+      //     out of tune with whatever they were played beside ----------------------------------------
       {"Flemish, close studio", {{kInstrument, kFlemish}, {kPitchA4, 433.9}, {kFront8, 1}, {kRoomSize, 3}, {kRoomAbsorption, 0.4}, {kMicDistance, 0.8}, {kMasterDb, -8.3}}},
       {"French, crisp studio", {{kInstrument, kFrench}, {kPitchA4, 437.3}, {kFront8, 1}, {kPlectrum, 0.7}, {kRoomSize, 3}, {kRoomAbsorption, 0.4}, {kMicDistance, 0.8}, {kMasterDb, -14.2}}},
       {"Italian, low tape pitch", {{kInstrument, kItalian}, {kPitchA4, 431.2}, {kFront8, 1}, {kRoomSize, 3}, {kMicDistance, 1.0}, {kMasterDb, -13.4}}},
-      {"Violins, dry and close", {{kInstrument, kViolin}, {kPitchA4, 442.0}, {kVibrato, 3}, {kBowForce, 0.9}, {kBowSpeed, 0.4}, {kRoomSize, 1}, {kMicDistance, 0.3}, {kMasterDb, -4.3}}},
-      {"Cellos, dry and close", {{kInstrument, kCello}, {kPitchA4, 442.0}, {kVibrato, 3}, {kBowForce, 2.0}, {kBowSpeed, 0.4}, {kRoomSize, 1}, {kMicDistance, 0.3}, {kMasterDb, -17.9}}},
-      {"Violins, warm studio", {{kInstrument, kViolin}, {kPitchA4, 435.9}, {kVibrato, 14}, {kVibratoRate, 5.8}, {kRoomSize, 3}, {kRoomAbsorption, 0.3}, {kMicDistance, 2}, {kMasterDb, -7.8}}},
-      {"Cellos, hard sawing", {{kInstrument, kCello}, {kPitchA4, 438.7}, {kBowForce, 2.2}, {kBowSpeed, 0.45}, {kVibrato, 6}, {kRoomSize, 3}, {kMicDistance, 0.6}, {kMasterDb, -17.7}}},
-      {"Celesta, sixties studio", {{kInstrument, kCelesta}, {kPitchA4, 434.3}, {kRoomSize, 3}, {kMicDistance, 1.0}, {kMasterDb, -11.5}}},
-      {"Upright, bright and close", {{kInstrument, kUpright}, {kPitchA4, 434.2}, {kHammerHardness, 0.75}, {kUnisonSpread, 3}, {kRoomSize, 3}, {kRoomAbsorption, 0.4}, {kMicDistance, 0.5}, {kMasterDb, -11.4}}},
-      {"Grand, studio ballad", {{kInstrument, kGrand}, {kPitchA4, 440.6}, {kRoomSize, 3}, {kRoomAbsorption, 0.35}, {kMicDistance, 1.2}, {kMasterDb, -9}}},
-      {"Electric piano, soft and dry", {{kInstrument, kElectricPiano}, {kPitchA4, 438.9}, {kHammerHardness, 0.4}, {kRoomSize, 2}, {kMicDistance, 0.5}, {kMasterDb, -13.2}}},
-      {"Violins, airy room", {{kInstrument, kViolin}, {kPitchA4, 439.8}, {kVibrato, 12}, {kRoomSize, 4}, {kMicDistance, 3}, {kMasterDb, -6.5}}},
-      {"Violins, big hall drive", {{kInstrument, kViolin}, {kPitchA4, 439.9}, {kBowForce, 1.0}, {kBowSpeed, 0.5}, {kVibrato, 16}, {kVibratoRate, 6}, {kRoomSize, 5}, {kRoomAbsorption, 0.2}, {kMicDistance, 5}, {kMasterDb, -12.7}}},
-      {"Cello, intimate", {{kInstrument, kCello}, {kPitchA4, 437.3}, {kBowForce, 1.3}, {kBowSpeed, 0.25}, {kVibrato, 10}, {kRoomSize, 2}, {kMicDistance, 0.8}, {kMasterDb, -16.5}}},
+      {"Violins, dry and close", {{kInstrument, kViolin}, {kPitchA4, 440}, {kVibrato, 3}, {kBowForce, 0.9}, {kBowSpeed, 0.4}, {kRoomSize, 1}, {kMicDistance, 0.3}, {kMasterDb, -4.3}}},
+      {"Cellos, dry and close", {{kInstrument, kCello}, {kPitchA4, 440}, {kVibrato, 3}, {kBowForce, 2.0}, {kBowSpeed, 0.4}, {kRoomSize, 1}, {kMicDistance, 0.3}, {kMasterDb, -17.9}}},
+      {"Violins, warm studio", {{kInstrument, kViolin}, {kPitchA4, 440}, {kVibrato, 14}, {kVibratoRate, 5.8}, {kRoomSize, 3}, {kRoomAbsorption, 0.3}, {kMicDistance, 2}, {kMasterDb, -7.8}}},
+      {"Cellos, hard sawing", {{kInstrument, kCello}, {kPitchA4, 440}, {kBowForce, 2.2}, {kBowSpeed, 0.45}, {kVibrato, 6}, {kRoomSize, 3}, {kMicDistance, 0.6}, {kMasterDb, -17.7}}},
+      {"Celesta, sixties studio", {{kInstrument, kCelesta}, {kPitchA4, 440}, {kRoomSize, 3}, {kMicDistance, 1.0}, {kMasterDb, -11.5}}},
+      {"Upright, bright and close", {{kInstrument, kUpright}, {kPitchA4, 440}, {kHammerHardness, 0.75}, {kUnisonSpread, 3}, {kRoomSize, 3}, {kRoomAbsorption, 0.4}, {kMicDistance, 0.5}, {kMasterDb, -11.4}}},
+      {"Grand, studio ballad", {{kInstrument, kGrand}, {kPitchA4, 440}, {kRoomSize, 3}, {kRoomAbsorption, 0.35}, {kMicDistance, 1.2}, {kMasterDb, -9}}},
+      {"Electric piano, soft and dry", {{kInstrument, kElectricPiano}, {kPitchA4, 440}, {kHammerHardness, 0.4}, {kRoomSize, 2}, {kMicDistance, 0.5}, {kMasterDb, -13.2}}},
+      {"Violins, airy room", {{kInstrument, kViolin}, {kPitchA4, 440}, {kVibrato, 12}, {kRoomSize, 4}, {kMicDistance, 3}, {kMasterDb, -6.5}}},
+      {"Violins, big hall drive", {{kInstrument, kViolin}, {kPitchA4, 440}, {kBowForce, 1.0}, {kBowSpeed, 0.5}, {kVibrato, 16}, {kVibratoRate, 6}, {kRoomSize, 5}, {kRoomAbsorption, 0.2}, {kMicDistance, 5}, {kMasterDb, -12.7}}},
+      {"Cello, intimate", {{kInstrument, kCello}, {kPitchA4, 440}, {kBowForce, 1.3}, {kBowSpeed, 0.25}, {kVibrato, 10}, {kRoomSize, 2}, {kMicDistance, 0.8}, {kMasterDb, -16.5}}},
       // --- famous instruments and ways of playing: a setup and a player's habits, on the family's
       //     one model (the bodies here are not measurements of those particular instruments) ------
       {"Stradivarius, concert", {{kInstrument, kViolin}, {kPitchA4, 442}, {kBowForce, 0.8}, {kBowSpeed, 0.35}, {kVibrato, 15}, {kVibratoRate, 6}, {kRoomSize, 5}, {kRoomAbsorption, 0.25}, {kMicDistance, 6}, {kMasterDb, -8.9}}},

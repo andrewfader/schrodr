@@ -7,6 +7,8 @@
 #include "audit_phrase.hpp"
 #include "spec.hpp"
 
+#include <cmath>
+#include <string>
 #include <vector>
 
 using namespace schrodr;
@@ -142,6 +144,42 @@ SCENARIO(every_preset_meets_the_quality_bar) {
   THEN("every one is finite, within 2 dB of the target loudness, under the ceiling with the clip light off, audible and free of DC");
   CHECK(all_ok, "all presets meet the bar");
   CHECK(presets::count() == params::kPresetCount, spec::fmt("preset table has %.0f entries, the parameter promises %.0f", static_cast<double>(presets::count()), params::kPresetCount));
+}
+
+SCENARIO(the_modern_studio_presets_play_at_a440) {
+  GIVEN("an A4 held on each modern instrument's studio preset (the harpsichords keep their records' pitch)");
+  // These presets were fitted to period records, tape speed and all, and so played 10 to 25 cents
+  // flat beside anything tuned to A440.
+  const char* modern[] = {"Violins, dry and close", "Cellos, dry and close", "Violins, warm studio", "Cellos, hard sawing",
+                          "Celesta, sixties studio", "Upright, bright and close", "Grand, studio ballad",
+                          "Electric piano, soft and dry", "Violins, airy room", "Violins, big hall drive", "Cello, intimate"};
+  bool all_ok = true;
+  int found = 0;
+  for (const char* name : modern)
+    for (size_t p = 0; p < presets::count(); ++p) {
+      if (std::string(presets::all()[p].name) != name) continue;
+      ++found;
+      Rig rig;
+      presets::apply(p, rig.s.v.data());
+      rig.on(69, 0.8); rig.render(static_cast<uint32_t>(1.6 * kRate));
+      const auto m = rig.mono();
+      // The average of short windows over the held second, so vibrato swings either side cancel.
+      double sum = 0; int n = 0;
+      for (size_t at = static_cast<size_t>(0.5 * kRate); at + 4800 <= m.size(); at += 2400) {
+        const double hz = measure::pitch_hz(Span(m, at, 4800), kRate, 100.0, 2000.0);
+        if (hz <= 0) continue;
+        double c = measure::cents(hz, 440.0);
+        c -= 1200.0 * std::round(c / 1200.0);  // a celesta speaks an octave up
+        sum += c; ++n;
+      }
+      const double off = n ? sum / n : 1e9;
+      // The instruments' own physics moves A4 a few cents either way (a bow's pressure flattens, a
+      // piano's stretched scale sharpens its middle); the records' tape speed moved it 15 to 25.
+      if (std::abs(off) > 12.0) { all_ok = false; std::printf("    '%s' A4 is %.1f cents from 440 Hz\n", name, off); }
+    }
+  THEN("each one sounds within 12 cents of 440 Hz, its tape-speed offset gone");
+  CHECK(found == 11, spec::fmt("found %.0f of the 11 presets by name", static_cast<double>(found)));
+  CHECK(all_ok, "the modern studio presets are at A440");
 }
 
 SCENARIO(the_output_limiter_holds_the_ceiling_and_leaves_quiet_signals_alone) {

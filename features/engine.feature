@@ -34,6 +34,11 @@ Feature: The engine plays one instrument from the keys, pedals and controllers
     Given each factory preset played the audit phrase
     Then every one is finite, within 2 dB of the target loudness, under the ceiling with the clip light off, audible and free of DC
 
+  # the_modern_studio_presets_play_at_a440
+  Scenario: The modern studio presets play at A440
+    Given an A4 held on each modern instrument's studio preset (the harpsichords keep their records' pitch)
+    Then each one sounds within 12 cents of 440 Hz, its tape-speed offset gone
+
   # the_output_limiter_holds_the_ceiling_and_leaves_quiet_signals_alone
   Scenario: The output limiter holds the ceiling and leaves quiet signals alone
     Given a fortissimo chord with the master at +12 dB, then at -24 dB
