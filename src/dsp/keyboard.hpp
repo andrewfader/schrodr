@@ -551,7 +551,8 @@ class Keyboard {
     std::array<Junction, 2> junction{};
     bool held = false, damping = false, free = false, sostenuto = false, sympathetic = false, awake = false, bowed = false;
     float env = 0.0f;
-    double damp_s = 0.06;
+    double damp_s = 0.06;         // the damping under way: how long it takes the string 60 dB
+    double damper_s = 0.06;       // how long this note's damper takes, at the default release
     // The hammer in flight: its position relative to the strings' rest, velocity, whether it is a
     // tangent that stays, how long it touched and how hard.
     bool hammer_active = false, hammer_hold = false;
@@ -615,6 +616,11 @@ class Keyboard {
     bend_ = 1.0;
     age_counter_ = 0;
     wheel_phase_ = 0.0;
+    // What the last notes left in the key bed's noise and the inspection readings: a reset
+    // instance plays as a fresh one does.
+    thump_tone_.reset(); click_tone_.reset();
+    rng_.seed(kRngSeed);
+    last_contact_ = 0; last_peak_force_ = 0.0;
   }
 
   // The player's settings for this block. A new instrument, pitch, temperament or room
@@ -928,7 +934,7 @@ class Keyboard {
   void restring(Note& n, int key, double hz) {
     const Spec& g = spec();
     n.pan = 2.0 * across(g, key) - 1.0;
-    n.damp_s = g.damper_s;
+    n.damp_s = n.damper_s = g.damper_s;
     if (g.exciter == Exciter::Plectrum) {
       n.courses = 2 + (g.has_four_foot ? 1 : 0);
       const double skew = 1.0 + g.jack_skew * (1.0 - across(g, key));
@@ -987,7 +993,7 @@ class Keyboard {
     static constexpr double kLengths[kDroneCount] = {0.46, 0.46, 0.40};
     n.courses = 1;
     n.pan = which == 2 ? 0.35 : -0.35 - 0.2 * (1 - which);
-    n.damp_s = 0.25;
+    n.damp_s = n.damper_s = 0.25;
     Course& co = n.course[0];
     co.junction = 0; co.active = true; co.pluck_mm = 0.0; co.detune_cents = 0.0;
     const double tension = 35.0, length = kLengths[which];
@@ -1218,7 +1224,9 @@ class Keyboard {
   double release_time(const Note& n) const {
     // Dampers are slower in the bass, where the felt wedges meet thick wound strings.
     const double bass = n.key < 60 ? 1.0 + (60 - n.key) / 40.0 : 1.0;
-    return std::max(0.005, setup_.release_s * (n.damp_s / 0.08) * bass);
+    // From the damper's own time, not the last damping's, or every release of a bass key would
+    // take longer than the one before.
+    return std::max(0.005, setup_.release_s * (n.damper_s / 0.08) * bass);
   }
 
   void damp(Note& n, double seconds) {
@@ -1266,10 +1274,14 @@ class Keyboard {
     n.awake = n.held = n.damping = n.free = n.sympathetic = n.bowed = n.hammer_active = n.hammer_hold = false;
     n.env = 0.0f; n.prev_force = 0.0f; n.coup_left = 0; n.dog_up = false;
     n.bow_force = 0.0; n.bow_v = 0.0; n.vib_time = 0.0;
+    n.hammer_y = n.hammer_v = n.hammer_x = 0.0; n.contact_samples = n.hammer_age = 0; n.peak_force = 0.0;
     for (auto& co : n.course) {
       co.v.clear(); co.h.clear();
       co.env = 0.0f; co.filtered_v = co.filtered_h = 0.0f;
-      co.tension_ratio = co.tension_target = 1.0; co.elongation = 0.0; co.ratio = 1.0;
+      // The stretch is measured every 32 samples from the clock's start: a string that rang out
+      // part way round it would measure its next blow at other samples than a fresh one does.
+      co.tension_ratio = co.tension_target = 1.0; co.elongation = 0.0; co.ratio = 1.0; co.elongation_clock = 0;
+      co.excite_tone.reset(); co.excite_level = 0.0f;
       co.excite_left = 0; co.pluck_in = 0; co.hammer_u = co.hammer_f = 0.0; co.bow_y = 0.0; co.bow_dv = 0.0; co.bow_s = 0.8;
       co.nut_gain = 1.0f; co.nut_pole = 0.0f; co.fade = 1.0f; co.fade_left = 0;
       if (co.designed) { co.tuned_ratio = -1.0; tune(n, co, true); }
@@ -1780,7 +1792,8 @@ class Keyboard {
   int crank_left_ = 0, last_contact_ = 0;
   double last_peak_force_ = 0.0;
   uint64_t age_counter_ = 0;
-  Rng rng_{0x67452301u};
+  static constexpr uint32_t kRngSeed = 0x67452301u;
+  Rng rng_{kRngSeed};
 };
 
 }  // namespace schrodr::dsp::keyboard

@@ -184,6 +184,11 @@ class Bars {
     for (auto& n : notes_) quiet(n);
     thump_ = 0.0f;
     for (auto& r : radiation_) r.reset();
+    // The key bed's noise and its random draws start again where a fresh instance's do.
+    thump_tone_.reset();
+    rng_.seed(kRngSeed);
+    last_contact_ = 0;
+    stamp_ = 0;
   }
   void configure(const Setup& in) {
     const Setup before = setup_;
@@ -390,6 +395,7 @@ class Bars {
     n.awake = n.held = n.damping = n.free = n.sostenuto = n.hammer_active = false;
     n.q.fill(0.0); n.q1.fill(0.0); n.q2.fill(0.0);
     n.env = 0.0f; n.hammer_f = n.hammer_u = 0.0;
+    n.hammer_y = n.hammer_v = 0.0; n.age = n.contact = 0; n.velocity_out = n.prev_pickup = 0.0f;
     n.body.reset();
   }
 
@@ -402,7 +408,8 @@ class Bars {
   float thump_ = 0.0f, thump_fall_ = 0.99f, env_fall_ = 0.9995f;
   int last_contact_ = 0;
   uint64_t stamp_ = 0;
-  Rng rng_{0x2545f491u};
+  static constexpr uint32_t kRngSeed = 0x2545f491u;
+  Rng rng_{kRngSeed};
 };
 
 }  // namespace schrodr::dsp::bars

@@ -337,6 +337,23 @@ SCENARIO(dampers_pedals_and_sympathetic_strings) {
   CHECK(rms_db(veiled, 0.05, 0.3) < rms_db(bare, 0.05, 0.3) - 3.0, "quieter");
 }
 
+SCENARIO(a_bass_key_is_damped_as_quickly_every_time_it_is_released) {
+  GIVEN("C2 on the grand, struck and released four times, each time left to die away");
+  Keyboard k = make(kGrand);
+  std::vector<double> drops;
+  for (int time = 0; time < 4; ++time) {
+    k.note_on(36, 0.7, 5);
+    const auto held = run(k, 0.4);
+    k.note_off(36);
+    const auto tail = run(k, 2.0);
+    drops.push_back(rms_db(held, 0.3, 0.1) - rms_db(tail, 0.15, 0.1));
+  }
+  THEN("the damper takes it down as far in the same time on the fourth release as on the first, within 1 dB");
+  // A bass damper is slower than a treble one; it must not get slower each time it lands.
+  CHECK(drops[0] > 15.0, ::spec::fmt("the first release damps it: %.1f dB down 0.15 s after", drops[0]));
+  CHECK(std::abs(drops[3] - drops[0]) < 1.0, ::spec::fmt("first release %.1f dB down, fourth %.1f dB", drops[0], drops[3]));
+}
+
 SCENARIO(the_wheel_bows_the_strings) {
   GIVEN("the hurdy-gurdy with a key held for a second and then let go");
   Keyboard h = make(kHurdyGurdy);

@@ -82,6 +82,11 @@ Feature: The string keyboards are real instruments, simulated
     When the fortepiano's moderator is on
     Then the cloth veils the blow: darker and quieter
 
+  # a_bass_key_is_damped_as_quickly_every_time_it_is_released
+  Scenario: A bass key is damped as quickly every time it is released
+    Given C2 on the grand, struck and released four times, each time left to die away
+    Then the damper takes it down as far in the same time on the fourth release as on the first, within 1 dB
+
   # the_wheel_bows_the_strings
   Scenario: The wheel bows the strings
     Given the hurdy-gurdy with a key held for a second and then let go

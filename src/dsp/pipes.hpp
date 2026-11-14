@@ -105,6 +105,10 @@ class Organ {
     for (auto& row : voices_) for (auto& v : row) silence(v);
     sag_ = 1.0;
     held_keys_.fill(false);
+    // The mouths' turbulence is one random stream for the whole organ, and the tremulant one
+    // swing: both start again where a fresh instance's do.
+    rng_.seed(kRngSeed);
+    tremulant_.reset();
   }
   void configure(const Setup& in) {
     const Setup before = setup_;
@@ -322,7 +326,8 @@ class Organ {
   std::array<std::array<Pipe, kRanks>, kKeys> pipes_{};
   std::array<bool, kKeys> held_keys_{};
   Lfo tremulant_;
-  Rng rng_{0x7a3e1d5bu};
+  static constexpr uint32_t kRngSeed = 0x7a3e1d5bu;
+  Rng rng_{kRngSeed};
 };
 
 }  // namespace schrodr::dsp::pipes

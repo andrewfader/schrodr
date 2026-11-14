@@ -4,8 +4,11 @@
 #include "spec.hpp"
 #include "../src/params.hpp"
 
+#include <algorithm>
+#include <cmath>
 #include <set>
 #include <string>
+#include <vector>
 
 using namespace harness;
 
@@ -111,6 +114,48 @@ SCENARIO(two_instances_are_independent) {
   CHECK(va == -20.0 && vb != -20.0, "independent parameters");
   a->destroy(a);
   b->destroy(b);
+}
+
+// What a host's CLAP reset() leaves behind must not change what the next notes sound like: a
+// bounce resets every processor first so that the file is what a freshly prepared instance renders.
+SCENARIO(a_reset_instance_plays_a_phrase_as_it_did_the_first_time) {
+  GIVEN("an instance that has played a phrase on the concert grand (the default preset)");
+  Library lib(g_path);
+  const clap_plugin_t* plugin = lib.create();
+  Runner run(plugin, 48000.0, 256);
+  const int keys[] = {60, 64, 67, 72, 67, 64, 60, 55};
+  const auto phrase = [&run, &keys]() {
+    std::vector<double> levels;
+    for (int block = 0; block < 96; ++block) {
+      Events events;
+      if (block % 12 == 0) events.push(note_event(CLAP_EVENT_NOTE_ON, 0, static_cast<int16_t>(keys[block / 12]), -1, 0.8));
+      if (block % 12 == 8) events.push(note_event(CLAP_EVENT_NOTE_OFF, 0, static_cast<int16_t>(keys[block / 12]), -1, 0.0));
+      const Block out = run.run(&events);
+      levels.push_back(out.rms);
+      levels.push_back(out.peak);
+    }
+    for (int block = 0; block < 400; ++block) run.run();   // every tail dies away
+    return levels;
+  };
+  const auto first = phrase();
+  WHEN("the host resets it and plays the phrase again");
+  plugin->reset(plugin);
+  const auto second = phrase();
+  THEN("every block sounds exactly as it did the first time");
+  double loudest = 0.0;
+  for (const double level : first) loudest = std::max(loudest, level);
+  CHECK(loudest > 1e-3, "the phrase sounds");
+  // Alike to a part in a million, block by block: the same code on the same state renders the
+  // same samples, and a hammer drawn from another random seed, or a string or a damper left in
+  // another state, differs by a percent or more.
+  double worst = 0.0;
+  bool alike = first.size() == second.size();
+  for (size_t i = 0; alike && i < first.size(); ++i)
+    worst = std::max(worst, std::abs(first[i] - second[i]) / std::max(first[i], 1e-6));
+  alike = alike && worst <= 1e-6;
+  std::printf("    worst block differs by %.4f%%\n", 100.0 * worst);
+  CHECK(alike, "a reset instance plays like a fresh one");
+  run.destroy();
 }
 
 int main(int argc, char** argv) {

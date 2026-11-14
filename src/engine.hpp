@@ -117,6 +117,9 @@ class Engine {
     peak_l_ = peak_r_ = 0.0f;
     clipped_ = false;
     instrument_ = -1;
+    // Each strike's variation is drawn from its count since the reset, so a host that resets
+    // before a bounce hears the same hammers every time.
+    strike_counter_ = 0;
   }
 
   // --- events ---
