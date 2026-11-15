@@ -69,6 +69,7 @@ constexpr int kMaxCourses = 3;   // strings to a note: unisons, or the 8' pair a
 constexpr int kLowModes = 10;
 constexpr int kDenseModes = 120;
 constexpr int kFeedbackDense = 30;
+constexpr int kAirModes = 3;
 
 enum class Exciter { Hammer, Plectrum, Tangent, Wheel, Bow };
 
@@ -122,6 +123,11 @@ struct Spec {
   std::array<int, 4> open{};
   std::array<double, 4> open_tension{};
   double scale_m = 0.0;
+  // The air the body encloses, as resonances that radiate themselves (through f-holes, or the
+  // gap between a case's rim and its board) rather than through the board's own acceleration:
+  // frequency at 20 C, quality factor and the share of the board's motion each one radiates at
+  // its peak. None where the body is open.
+  std::array<Mode, kAirModes> air{};
 };
 
 inline double interp_log(double a, double b, double t) { return a * std::pow(b / a, std::clamp(t, 0.0, 1.0)); }
@@ -382,7 +388,10 @@ inline const Spec& spec(int model) {
                  0, 0, 0, 0, 0, 0, 0, 0, false, 0, 0.1,
                  scaled(violin_modes, 0.38, 0.6), 0.006, 1.3, 650, 8000, 20, 22, 0.006, 250, 1800,
                  0.3, 2.0, 0.2, 0.004, 200, 0.2, false, false, false,
-                 {36, 43, 50, 57}, {140, 137, 147, 186}, 0.690};
+                 {36, 43, 50, 57}, {140, 137, 147, 186}, 0.690,
+                 // A0, the air through the f-holes at 100 Hz (Q 10), and the cavity's broad
+                 // lowest wall-air resonance near 140 Hz, fitted to the Iowa cello.
+                 {{{100, 10.0, 8.2}, {140, 2.0, 1.6}, {0, 0, 0}}}};
     return g;
   }();
   return specs[static_cast<size_t>(std::clamp(model, 0, kModelCount - 1))];
@@ -604,6 +613,7 @@ class Keyboard {
     held_keys_.fill(false);
     held_count_ = 0;
     for (auto& b : board_) b.reset();
+    for (auto& a : air_) a.reset();
     feedback_.reset();
     feedback_out_ = 0.0f;
     for (auto& f : accel_) f.reset();
@@ -851,8 +861,8 @@ class Keyboard {
     // a wooden plate's reach; and the mono bank whose motion feeds every string back.
     float out_l = board_[0].process(force_l), out_r = board_[1].process(force_r);
     feedback_out_ = feedback_.process(feedback_in);
-    out_l = rolloff_[0].low(accel_[0].high(out_l));
-    out_r = rolloff_[1].low(accel_[1].high(out_r));
+    out_l = rolloff_[0].low(accel_[0].high(out_l) + air_[0].process(out_l));
+    out_r = rolloff_[1].low(accel_[1].high(out_r) + air_[1].process(out_r));
     left = dc_[0].process(out_l * static_cast<float>(output_scale_));
     right = dc_[1].process(out_r * static_cast<float>(output_scale_));
     const float level = std::max(std::abs(left), std::abs(right));
@@ -860,6 +870,7 @@ class Keyboard {
     if (!any && board_env_ < 1e-7f) {
       // Everything has rung out: exact zeros, no denormals.
       for (auto& b : board_) b.reset();
+      for (auto& a : air_) a.reset();
       feedback_.reset();
       feedback_out_ = 0.0f;
     }
@@ -1168,6 +1179,13 @@ class Keyboard {
       for (const Mode& m : g.modes) feedback_.add(m.hz * wood.frequency_ratio, m.q * wood.q_ratio, gamma_of(0.5 * m.mobility * wood.q_ratio), rate_);
       for (double f = g.dense_from_hz; f < g.dense_to_hz && feedback_.count() < kLowModes + kFeedbackDense; f += (g.dense_to_hz - g.dense_from_hz) / kFeedbackDense * (0.6 + 0.8 * r.unipolar()))
         feedback_.add(f * wood.frequency_ratio, g.dense_q * wood.q_ratio, gamma_of(0.3 * g.dense_mobility * wood.q_ratio) * (r.unipolar() < 0.5 ? -1.0 : 1.0), rate_);
+    }
+    // The enclosed air's resonances, tuned by the speed of sound in the room.
+    const double sound = air::speed_of_sound(setup_.celsius) / air::speed_of_sound(20.0);
+    for (int ch = 0; ch < 2; ++ch) {
+      air_[static_cast<size_t>(ch)].clear();
+      for (const Mode& m : g.air)
+        if (m.hz > 0.0 && m.mobility > 0.0) air_[static_cast<size_t>(ch)].add(m.hz * sound, m.q, m.mobility, rate_);
     }
     for (int ch = 0; ch < 2; ++ch) {
       accel_[static_cast<size_t>(ch)].set(g.acceleration_hz, rate_);
@@ -1772,6 +1790,7 @@ class Keyboard {
   int held_count_ = 0;
   string::Shape shape_;
   std::array<string::ModalBank<kLowModes + kDenseModes>, 2> board_{};
+  std::array<string::ModalBank<kAirModes>, 2> air_{};
   string::ModalBank<kLowModes + kFeedbackDense> feedback_{};
   float feedback_out_ = 0.0f, floor_hp_ = 0.9f;
   double bow_lag_ = 0.3, hair_lag_ = 0.5;

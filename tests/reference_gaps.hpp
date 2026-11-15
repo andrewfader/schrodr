@@ -39,8 +39,8 @@ constexpr const char* kViolinColour = "too much above 5 kHz (10 to 18 dB) and to
 constexpr const char* kViolaColour = "too much above 4 kHz (up to 20 dB) and dips of 10 to 20 dB between 200 and 800 Hz";
 constexpr const char* kViolaBrightness = "D4 is 1.5 times as bright as the Iowa viola's";
 constexpr const char* kCelloLowPartials =
-    "the C and G strings lack their fundamental and low partials (100 to 200 Hz 10 to 35 dB under the Iowa cello's) and have "
-    "too much above 2 kHz, so they are two to four times too bright";
+    "with A0's air radiating, the C string still lacks its low partials (100 to 160 Hz 4 to 17 dB under the Iowa cello's, "
+    "E2 at ff 30 under where it squeals) and has too much above 2 kHz (10 to 24 dB), so C2 at pp is three times too bright";
 constexpr const char* kCelloSquealE2 =
     "E2 bowed ff leaves Helmholtz motion after 0.9 s and squeals on its 8th harmonic (665 Hz); pp and mf hold";
 constexpr const char* kGrandB0Touch =
@@ -197,36 +197,23 @@ inline const std::vector<Gap>& known_gaps() {
       {"cello_C2_pp:brightness", kCelloLowPartials},
       {"cello_C2_pp:bow noise", kBowNoise},
       {"cello_C2_mf:colour", kCelloLowPartials},
-      {"cello_C2_mf:brightness", kCelloLowPartials},
       {"cello_C2_mf:bow noise", kBowNoise},
       {"cello_C2_ff:colour", kCelloLowPartials},
-      {"cello_C2_ff:brightness", kCelloLowPartials},
       {"cello_C2_ff:dynamics", kBowTouch},
       {"cello_C2_ff:bow noise", kBowNoise},
       {"cello_E2_pp:colour", kCelloLowPartials},
-      {"cello_E2_pp:brightness", kCelloLowPartials},
       {"cello_E2_mf:colour", kCelloLowPartials},
-      {"cello_E2_mf:bow noise", kBowNoise},
       {"cello_E2_ff:pitch", kCelloSquealE2},
       {"cello_E2_ff:colour", kCelloLowPartials},
       {"cello_E2_ff:dynamics", kBowTouch},
       {"cello_E2_ff:bow noise", kBowNoise},
       {"cello_G2_pp:colour", kCelloLowPartials},
-      {"cello_G2_pp:brightness", kCelloLowPartials},
       {"cello_G2_pp:bow noise", kBowNoise},
-      {"cello_G2_mf:colour", kCelloLowPartials},
-      {"cello_G2_mf:brightness", kCelloLowPartials},
       {"cello_G2_mf:bow noise", kBowNoise},
       {"cello_G2_ff:colour", kCelloLowPartials},
-      {"cello_G2_ff:brightness", kCelloLowPartials},
       {"cello_G2_ff:dynamics", kBowTouch},
-      {"cello_G2_ff:bow noise", kBowNoise},
-      {"cello_D3_pp:colour", kCelloLowPartials},
-      {"cello_D3_pp:brightness", kCelloLowPartials},
       {"cello_D3_pp:bow noise", kBowNoise},
       {"cello_D3_mf:bow noise", kBowNoise},
-      {"cello_D3_ff:colour", kCelloLowPartials},
-      {"cello_D3_ff:brightness", kCelloLowPartials},
       {"cello_D3_ff:dynamics", kBowTouch},
       {"cello_A3_pp:bow noise", kBowNoise},
       {"cello_A3_mf:colour", kCelloLowPartials},

@@ -464,6 +464,28 @@ SCENARIO(the_bow_plays_the_violin_family) {
   CHECK(speaks(hard) + 10.0 < speaks(soft), ::spec::fmt("speaks in %.0f ms against %.0f ms", speaks(hard), speaks(soft)));
 }
 
+SCENARIO(the_cellos_enclosed_air_carries_its_low_notes) {
+  GIVEN("the cello, whose body encloses air that resonates through its f-holes");
+  const Spec& g = keyboard::spec(kCello);
+  THEN("the air's lowest resonance, A0, sits near 100 Hz, where the makers measure it");
+  CHECK(std::abs(g.air[0].hz - 100.0) < 10.0 && g.air[0].mobility > 0.0, ::spec::fmt("A0 at %.0f Hz", g.air[0].hz));
+  WHEN("G2 (98 Hz, on A0) and C2 (65 Hz, below it) are bowed at a cellist's force without vibrato");
+  const auto low_partials = [](int key) {
+    Setup s; s.vibrato_cents = 0.0; s.bow_force = 1.5;
+    Keyboard k = make(kCello, s);
+    k.note_on(key, 0.7, 1);
+    const auto x = run(k, 1.6);
+    const auto h = measure::harmonics(Span(x, static_cast<size_t>(0.8 * kRate), static_cast<size_t>(0.8 * kRate)), kRate, k.pitch_at(key), 8);
+    double top = 0.0;
+    for (double a : h) top = std::max(top, a);
+    return measure::db(h[0]) - measure::db(top);
+  };
+  const double g2 = low_partials(43), c2 = low_partials(36);
+  THEN("G2's fundamental stands within 10 dB of its strongest harmonic, and C2's within 25 dB: the air radiates what the plates, too small for such long waves, cannot");
+  CHECK(g2 > -10.0, ::spec::fmt("G2's fundamental %.1f dB under its strongest harmonic", -g2));
+  CHECK(c2 > -25.0, ::spec::fmt("C2's fundamental %.1f dB under its strongest harmonic", -c2));
+}
+
 SCENARIO(the_whole_instrument_is_stable_with_everything_ringing) {
   GIVEN("every string keyboard with the pedal down and every fourth key struck fortissimo");
   bool all_finite = true, all_decay = true;

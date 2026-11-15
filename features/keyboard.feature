@@ -110,6 +110,13 @@ Feature: The string keyboards are real instruments, simulated
     Then leaning draws the bow faster and harder together: at least 4 dB louder
     And a hard key sets the string going sooner than a soft one
 
+  # the_cellos_enclosed_air_carries_its_low_notes
+  Scenario: The cello's enclosed air carries its low notes
+    Given the cello, whose body encloses air that resonates through its f-holes
+    Then the air's lowest resonance, A0, sits near 100 Hz, where the makers measure it
+    When G2 (98 Hz, on A0) and C2 (65 Hz, below it) are bowed at a cellist's force without vibrato
+    Then G2's fundamental stands within 10 dB of its strongest harmonic, and C2's within 25 dB
+
   # the_whole_instrument_is_stable_with_everything_ringing
   Scenario: The whole instrument is stable with everything ringing
     Given every string keyboard with the pedal down and every fourth key struck fortissimo

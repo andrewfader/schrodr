@@ -134,6 +134,26 @@ A0 through the f-holes, the corpus bending mode CBR and the plate modes B1- and 
 low sound, then a run of plate modes and a dense set rising to the bridge hill and falling off
 above it.
 
+**The enclosed air radiates for itself.** The board's modes radiate as its acceleration, a
+high-pass below the plate's coincidence, which is right for a plate but not for the air inside a
+body: A0 is a Helmholtz resonance whose volume of air moves in and out of the f-holes, a monopole
+source that radiates the low notes the plates, small against their wavelength, cannot. Every
+instrument can carry up to three such air resonances (`Spec::air`: frequency, Q and the share of
+the board's motion each radiates at its peak), driven by the board's motion and added to the
+radiated sound past the acceleration filter, tuned by the room's speed of sound. They radiate
+only; nothing of them returns to the strings, so tuning, the bow's Helmholtz motion and the
+dampers are untouched. The cello has two, fitted to the Iowa cello by bounded coordinate search
+(bounds: frequency within 35 % of the starting guess, Q 2 to 60) on the mean envelope distance
+plus ten times the mean centroid error, with every reference check that passed without them
+held as a constraint: A0 at 100 Hz with a Q of 10 radiating 8.2 times the board's motion, and a
+broad resonance (Q 2) near 140 Hz radiating 1.6 times, the cavity's coupling to the low wall
+modes. Against the Iowa cello the mean envelope distance fell from 10.3 to 8.1 dB and the mean
+centroid error from 1.22 to 0.66 octaves, and thirteen of its listed gaps close (eight brightness, three colour, two bow noise)
+(`keyboard_tests`: G2, on A0, keeps its fundamental within 10 dB of its strongest harmonic and C2
+within 25 dB). The violin's and viola's were tried the same way and left out: an A0 strong
+enough to fill their 300 to 500 Hz dip made the A4 to E5 notes, already half as bright as the
+Iowa violin's, duller still, and cost checks that pass without it.
+
 **The bridge** is a junction shared by the strings of a note: every string's arriving wave,
 weighted by its impedance, drives the bridge through its mobility (a floor rising toward the
 treble, plus the soundboard's ten lowest modes at 2 Z Y / (1 + Z Y)), and every string gets the
