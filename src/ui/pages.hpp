@@ -35,10 +35,11 @@ inline std::vector<PageSpec> schrodr_pages() {
        {{"Pedals", 0, {knob(kSustain), toggle(kSostenuto), knob(kUnaCorda), knob(kModerator)}},
         {"Resonance", 1, {knob(kSympathetic)}},
         {"Lid", 2, {segments(kLid, 3)}}}},
-      {"ROOM", "The room the instrument stands in, the air, and the microphones", theme::cyan, 3, 150,
+      {"ROOM", "The room the instrument stands in, the air, the microphones and the tape machine after them", theme::cyan, 3, 150,
        {{"Room", 0, {menu(kRoomSize, 2), knob(kRoomAbsorption), knob(kMicDistance)}},
         {"Microphones", 1, {menu(kMicPattern, 2), segments(kMicSetup, 2)}},
-        {"Air", 2, {knob(kHumidity), knob(kTemperature)}}}},
+        {"Air", 2, {knob(kHumidity), knob(kTemperature)}},
+        {"Tape machine", 1, {knob(kWowFlutter), knob(kTapeBandwidth)}}}},
   };
 }
 
@@ -66,6 +67,8 @@ inline const char* schrodr_short_name(int id) {
     case kBowSpeed: return "Speed";
     case kBowPosition: return "Position";
     case kVibratoRate: return "Vib rate";
+    case kWowFlutter: return "Wow";
+    case kTapeBandwidth: return "Bandwidth";
     default: return nullptr;
   }
 }

@@ -1,9 +1,9 @@
 // The instrument: one keyboard (strings, bars or pipes) played from the keys and pedals, heard
-// in a room through the air, through the master level and an output limiter. The engine knows
-// nothing about CLAP: it takes a snapshot of parameter values per block and note events with
-// sample offsets, and it never allocates while rendering. There are no voices in the synthesizer
-// sense: a key plays the instrument's own strings, bars or pipes, which know how many of them
-// can sound at once.
+// in a room through the air, recorded on a tape machine, through the master level and an output
+// limiter. The engine knows nothing about CLAP: it takes a snapshot of parameter values per block
+// and note events with sample offsets, and it never allocates while rendering. There are no
+// voices in the synthesizer sense: a key plays the instrument's own strings, bars or pipes, which
+// know how many of them can sound at once.
 #pragma once
 
 #include <algorithm>
@@ -16,6 +16,7 @@
 #include "dsp/core.hpp"
 #include "dsp/keyboard.hpp"
 #include "dsp/pipes.hpp"
+#include "dsp/tape.hpp"
 #include "params.hpp"
 
 namespace schrodr {
@@ -100,6 +101,7 @@ class Engine {
     bars_.prepare(rate);
     organ_.prepare(rate);
     room_.prepare(rate);
+    tape_.prepare(rate);
     limiter_.prepare(rate);
     master_.set_time(10.0, rate);
     master_.snap(dsp::db_to_gain(params::kSpecs[params::kMasterDb].def));
@@ -109,6 +111,7 @@ class Engine {
   void reset() {
     keyboard_.reset(); bars_.reset(); organ_.reset();
     room_.reset();
+    tape_.reset();
     limiter_.reset();
     for (auto& f : lid_) f.reset();
     bend_.fill(0.0); wheel_.fill(0.0); pressure_.fill(0.0);
@@ -209,6 +212,7 @@ class Engine {
     const bool strings = params::is_string_instrument(instrument_), bars = params::is_bar_instrument(instrument_);
     const bool violin = params::is_violin_family(instrument_);
     room_.configure(room_settings(s));
+    tape_.configure(s[params::kWowFlutter], s[params::kTapeBandwidth]);
     const int lid = std::clamp(static_cast<int>(std::lround(s[params::kLid])), 0, 2);
     // The lid: closed, the top end and a few decibels go; half, less so; open, nothing.
     const double lid_hz = lid == 0 ? 600.0 : lid == 1 ? 3000.0 : 20000.0;
@@ -232,6 +236,7 @@ class Engine {
       l = mid + side; r = mid - side;
       if (perspective > 0.0) { const float a = l; l = static_cast<float>(l * (1.0 - perspective) + r * perspective); r = static_cast<float>(r * (1.0 - perspective) + a * perspective); }
       room_.process(l, r);
+      tape_.process(l, r);
       const float gain = static_cast<float>(master_.next());
       l *= gain; r *= gain;
       if (!std::isfinite(l)) l = 0.0f;
@@ -259,7 +264,7 @@ class Engine {
       probe.configure(room_settings(s));
       seconds += probe.rt60_low() + 0.6;
     }
-    seconds += s[params::kMicDistance] / 300.0;
+    seconds += s[params::kMicDistance] / 300.0 + (s[params::kWowFlutter] > 0.0 ? 0.02 : 0.0);
     return static_cast<uint32_t>(std::min(seconds * rate_, 2.0e9));
   }
 
@@ -353,6 +358,7 @@ class Engine {
   dsp::bars::Bars bars_;
   dsp::pipes::Organ organ_;
   dsp::air::Room room_;
+  dsp::tape::Machine tape_;
   Limiter limiter_;
   dsp::Smoother master_;
   std::array<dsp::OnePole, 2> lid_{};

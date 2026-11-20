@@ -39,11 +39,17 @@ Railsback curve emerges from the strings), and unisons left a cent apart, or eig
 cardioid or figure-8 microphone, as a stereo pair or one mono mic, with its proximity effect;
 the room's humidity reaches the soundboard and its temperature the strings.
 
-**Seventy-five presets**, each an instrument in a room at the pitch its music was made at, from
+**The tape machine**: after the microphones, a recorder's wow and flutter (its reels, pinch
+roller and capstan pulling the pitch about, in cents RMS) and its bandwidth (the heads' top end);
+out of the chain at its defaults.
+
+**Seventy-eight presets**, each an instrument in a room at the pitch its music was made at, from
 "Concert grand" and "Honky upright" through "Fortepiano, Walter", "Cristofori 1720", "Flemish,
 lute stop", "French double, Vallotti", "Clavichord, bebung" and "Hurdy-gurdy, trompette" to
-"Electric piano, bark", "Toy piano", "Organ, principal chorus", "Antique Steinway", "Cello in a hall", "Stradivarius, concert" and "Fiddle, front porch"; all measured against the
-[quality bar](docs/QUALITY.md) by `build/schrodr-preset-audit` and held to it by the test suite.
+"Electric piano, bark", "Toy piano", "Organ, principal chorus", "Antique Steinway", "Cello in a hall", "Stradivarius, concert", "Fiddle, front porch" and "Upright, four-track
+cassette"; all measured against the [quality bar](docs/QUALITY.md) by `build/schrodr-preset-audit`
+and held to it by the test suite, and the three on tape held to the stems of the lo-fi records
+they were written for by `record_gate_tests`.
 
 Sustain, sostenuto and soft pedals from CC 64, 66 and 67 and from parameters; aftertouch and
 the mod wheel for the clavichord's bebung, the hurdy-gurdy's coup and a swell on the bow; CLAP and MIDI note
@@ -86,6 +92,7 @@ hardware, installed plug-ins or the network.
 | `air_tests` | the room and its air against the physics: the speed of sound, ISO 9613-1, Sabine's time, wood moisture, string expansion |
 | `engine_tests` | notes, pedals and controllers, dynamics, the instrument switch, every instrument at a comparable level, every preset against the quality bar, the limiter, the tail |
 | `reference_tests` | 13 of the 25 instruments against recordings of real ones (Iowa MIS, VSCO-2, VCSL, Edinburgh, Sonatina, jRhodes3d, Freesound), note for note: spectral envelope, brightness, dynamics, inharmonicity, decay, overtones, bow noise; known gaps listed with their causes and held from closing silently |
+| `record_gate_tests` | the presets written for kinds of record, measured as the song corpus measures separated stems (pYIN tape wobble included), inside the quartiles of those records' piano and other stems |
 | `plugin_smoke`, `note_tests`, `state_tests` | the built `.clap` through the public CLAP ABI: discovery, ports, parameters, events at sample offsets, MIDI, presets, state round trips, malformed state |
 | `advertised_tests` | one proof per parameter from audio; fails if a parameter has no proof |
 | `ui_tests` | the real page table and editor against a fake host that enforces gesture rules and a canvas that records drawing |
@@ -95,8 +102,9 @@ hardware, installed plug-ins or the network.
 `build/schrodr-preset-audit <dir>` renders and measures every preset (see
 [docs/QUALITY.md](docs/QUALITY.md)), `build/schrodr-note-render` renders one note of any
 instrument for listening, `tools/fetch_references.py` and `build/schrodr-reference-extract`
-fetch and measure the reference recordings (see [docs/QUALITY.md](docs/QUALITY.md)), and
-`tools/coverage.py` reports line coverage from a
+fetch and measure the reference recordings (see [docs/QUALITY.md](docs/QUALITY.md)),
+`build/schrodr-record-gate-try` and `tools/record_gate_profiles.py` tune a records preset and
+regenerate the records' numbers, and `tools/coverage.py` reports line coverage from a
 `-DSCHRODR_COVERAGE=ON` build. [AGENTS.md](AGENTS.md) is the verification contract for changes.
 
 ## Layout
@@ -109,11 +117,12 @@ fetch and measure the reference recordings (see [docs/QUALITY.md](docs/QUALITY.m
     src/dsp/pipes.hpp     the organ's flue pipes
     src/dsp/temperament.hpp the temperaments
     src/dsp/air.hpp       the room and the air
+    src/dsp/tape.hpp      the tape machine after the microphones
     src/engine.hpp        the keys, pedals and controllers into one instrument, the room, the master and limiter
     src/schrodr.cpp       the CLAP plug-in (the only file that includes CLAP besides the tests)
     src/ui/               the editor: canvas, layout, widgets, pages, artwork, native backends
     tests/                scenario suites and the CLAP harness
-    tools/                preset_audit.cpp, note_render.cpp, ui_preview.cpp, coverage.py
+    tools/                preset_audit.cpp, note_render.cpp, ui_preview.cpp, record_gate_try.cpp, coverage.py
     features/             Gherkin scenarios mapped to tests
 
 ## Licence

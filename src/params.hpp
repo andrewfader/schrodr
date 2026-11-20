@@ -40,6 +40,8 @@ enum ParamId : uint32_t {
   kPreset,
   // --- the bow and the left hand (violin, viola, cello) ----------------------------------------------
   kBowForce, kBowSpeed, kBowPosition, kVibrato, kVibratoRate,
+  // --- the tape machine after the microphones ----------------------------------------------------
+  kWowFlutter, kTapeBandwidth,
   kParamCount
 };
 
@@ -106,7 +108,7 @@ constexpr const char* kRoomSizeNames[kRoomSizeCount] = {"Off", "Booth", "Bedroom
 constexpr std::array<double, kRoomSizeCount> kRoomVolumes{0.0, 10.0, 35.0, 150.0, 600.0, 3000.0, 12000.0};
 constexpr const char* kMicPatternNames[] = {"Omni", "Cardioid", "Figure-8"};
 constexpr const char* kMicSetupNames[] = {"Stereo pair", "Mono"};
-constexpr int kPresetCount = 75;  // The names live in presets.hpp; the table only needs the size.
+constexpr int kPresetCount = 78;  // The names live in presets.hpp; the table only needs the size.
 
 constexpr std::array<ParamSpec, kParamCount> kSpecs{{
     // the instrument and its tuning
@@ -172,6 +174,9 @@ constexpr std::array<ParamSpec, kParamCount> kSpecs{{
     {"Bow position", "Action/Bow", 0.04, 0.25, 0.1, false, Unit::Percent, nullptr},
     {"Vibrato", "Action/Bow", 0, 40, 12, false, Unit::Cents, nullptr},
     {"Vibrato rate", "Action/Bow", 3, 8, 5.5, false, Unit::Hz, nullptr},
+    // the tape machine
+    {"Wow & flutter", "Room/Tape", 0, 30, 0, false, Unit::Cents, nullptr},
+    {"Tape bandwidth", "Room/Tape", 1000, 20000, 20000, false, Unit::Hz, nullptr},
 }};
 
 // The preset parameter's value names come from the preset table, which lives above this header

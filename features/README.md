@@ -17,4 +17,5 @@ this directory, and a test without a scenario is a bug in the test.
 | clap_plugin.feature | `plugin_smoke`, `note_tests`, `state_tests` |
 | advertised_parameters.feature | `advertised_tests` |
 | reference_recordings.feature | `reference_tests` |
+| record_gate.feature | `record_gate_tests` |
 | editor.feature | `ui_tests`, `frontend_tests` (Linux) |

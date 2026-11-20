@@ -83,6 +83,8 @@ const char* gui_help(clap_id id) {
     case kBowPosition: return "Where the bow meets the string, as a fraction of it from the bridge. Nearer the bridge the string swings wider for the same stroke and needs more force to grip; further out less force will do.";
     case kVibrato: return "The left hand's vibrato: how far the finger rolls the pitch either side of the note, in cents. It comes in once the note has spoken.";
     case kVibratoRate: return "How fast the vibrato swings, in cycles a second; every note's own rate varies a little.";
+    case kWowFlutter: return "The tape machine's wow and flutter: how far its reels, pinch roller and capstan pull the pitch about, in cents RMS. A good deck holds it to a cent or two; a worn cassette transport wavers ten or more.";
+    case kTapeBandwidth: return "The tape machine's top end, where its heads and slow tape are 3 dB down. At 20 kHz the machine passes everything.";
     default: return "Adjusts this part of the current sound; changes are immediately audible and automatable.";
   }
 }

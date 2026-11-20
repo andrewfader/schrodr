@@ -46,6 +46,24 @@ held -22 to -10 dBFS RMS, peak under the ceiling). When a model's level changes,
    empty.
 4. Run the complete suite.
 
+## The records
+
+The presets written for a kind of record rather than a room ("Upright, four-track cassette",
+"Upright, home studio tape", "Celesta, home studio tape") are held by `record_gate_tests`
+(`features/record_gate.feature`) to the separated stems of the user's own records: each plays
+sixteen seconds of a phrase (`tests/record_gate.hpp`) and its spectral centroid, 85% roll-off,
+share above 3 kHz, 100 ms crest, L/R correlation and pYIN tape wobble must land inside the
+interquartile range of the piano stem (and, for the celesta, the other stem) of its group of
+records. The quartiles are numbers in `tests/record_reference.hpp`, generated from the song
+corpus's `features_ref.json` by `tools/record_gate_profiles.py`; `tests/record_features.hpp`
+measures as the corpus's `scripts/features.py` does. To tune one:
+`build/schrodr-record-gate-try "Preset" chords|melody [Param=value ...] [out=render.wav]`
+prints its measures and the verdict against every group's stems, and writes the render so the
+corpus's own script can measure the same audio.
+
+The stems' level in the mix (a lo-fi record's piano sits 30 to 50 dB under the mix) is the mix's
+choice, not the instrument's, and is not gated.
+
 ## The reference recordings
 
 The bar above holds a preset to levels and a clean tail. It cannot tell whether a grand sounds

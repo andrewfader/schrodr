@@ -224,6 +224,18 @@ of sound, image sources to second order, an eight-line feedback delay network at
 time, the microphone's pattern and proximity effect, one microphone or a pair. `air_tests` holds
 the delay within a sample, the absorption within 1 dB, Sabine's time within 25%.
 
+## The tape machine
+
+See `src/dsp/tape.hpp`: the recorder after the microphones, out of the chain at its defaults.
+Wow and flutter is the tape's speed wavering with the transport's turning parts, once a turn each:
+a cassette transport's reels mid-spool (0.5 Hz), 12 mm pinch roller (1.26 Hz) and 2.4 mm capstan
+(6.3 Hz) at 4.76 cm/s, with 40, 30 and 30% of the deviation's power; the parameter is its RMS in
+cents. It is a delay whose rate of change is the speed's deviation, a cosine per part, so it never
+drifts. The bandwidth is the heads' and slow tape's top end: a fourth-order Butterworth low-pass at
+the stated -3 dB frequency. `advertised_tests` reads 12 cents RMS back off a tuner within 1.5
+cents, and the low-pass's loss at four of a note's partials within 0.5 dB of the Butterworth's.
+Tape saturation, hiss, the head bump, print-through and dropouts are not modelled.
+
 ## What is not modelled
 
 - Longitudinal (phantom) partials of piano strings, the duplex scale and the soundboard's

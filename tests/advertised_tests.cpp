@@ -317,6 +317,30 @@ auto VibratoHz(double expected, double tolerance) {
   };
 }
 
+// Wow and flutter: steady without it, and with it the pitch's RMS deviation is `expected` cents.
+auto WowCents(double expected, double tolerance) {
+  return [=](const Render& a, const Render& b) {
+    const double sa = swing_cents(pitch_track(a, 0.5)) / std::sqrt(2.0), sb = swing_cents(pitch_track(b, 0.5)) / std::sqrt(2.0);
+    if (sa > 1.0) return fail("without wow and flutter the pitch deviates %.1f cents RMS", sa);
+    return std::abs(sb - expected) <= tolerance ? ok() : fail("the pitch deviates %.1f cents RMS, expected %.1f", sb, expected);
+  };
+}
+// A fourth-order Butterworth low-pass at `corner` Hz (bilinear, as the machine's is): each of the
+// note's `partials` loses what -10 log10(1 + W^8) gives at its own frequency, W = tan(pi f / fs) /
+// tan(pi fc / fs).
+auto LowPassAt(double corner, std::vector<int> partials, double tolerance_db) {
+  return [=](const Render& a, const Render& b) {
+    for (int n : partials) {
+      const double hz = peak_hz(held(a), g_note_hz * n, 40.0);
+      const double w = std::tan(measure::kPi * hz / kRate) / std::tan(measure::kPi * corner / kRate);
+      const double expected = -10.0 * std::log10(1.0 + std::pow(w, 8.0));
+      const double d = measure::db(measure::tone_amplitude(held(b), kRate, hz)) - measure::db(measure::tone_amplitude(held(a), kRate, hz));
+      if (std::abs(d - expected) > tolerance_db) return fail("the partial at %.0f Hz moved %.1f dB", hz, d) + fail(", expected %.1f", expected);
+    }
+    return ok();
+  };
+}
+
 Context ctx(int instrument, std::vector<Setting> settings = {}, int key = 60) { Context c; c.instrument = instrument; c.settings = std::move(settings); c.key = key; return c; }
 
 std::array<Proof, P::kParamCount> proofs() {
@@ -436,6 +460,13 @@ std::array<Proof, P::kParamCount> proofs() {
   { Context c = ctx(kViolin, {}, 69); c.hold_s = 2.0; set(kVibrato, c, 0, 20, VibratoCents(20.0, 5.0)); }
   // The vibrato at 7 Hz: each note's own rate is within 5 % of it.
   { Context c = ctx(kViolin, {{kVibrato, 20}}, 69); c.hold_s = 2.5; set(kVibratoRate, c, 4.0, 7.0, VibratoHz(7.0, 0.6)); }
+  // the tape machine
+  // 12 cents RMS of wow and flutter under the chamber organ's steady C4, read off a tuner every
+  // 10 ms over four seconds (two turns of the reels).
+  { Context c = ctx(kOrgan, {{kChiff, 0}}); c.hold_s = 4.5; set(kWowFlutter, c, 0, 12, WowCents(12.0, 1.5)); }
+  // The bright Flemish c'' through a 3 kHz machine against an open one: its partials near the
+  // corner (the 6th, 3.1 kHz, about 4 dB down) and an octave above it (the 12th, about 25 dB).
+  set(kTapeBandwidth, ctx(kFlemish, {}, 72), 20000, 3000, LowPassAt(3000.0, {2, 4, 6, 12}, 0.5));
   return t;
 }
 

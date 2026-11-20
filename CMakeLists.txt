@@ -121,6 +121,8 @@ schrodr_test(engine_tests)
 # SCHRODR's notes against real recordings, from the numbers in tests/reference_data.hpp.
 schrodr_test(reference_tests)
 schrodr_timeout(reference_tests 1800)
+# The presets written for kinds of record against the song corpus's stems, from tests/record_reference.hpp.
+schrodr_test(record_gate_tests)
 
 # Suites that load the built .clap and drive it through the public CLAP interfaces, as a host does.
 function(schrodr_plugin_test name)
@@ -158,6 +160,13 @@ target_compile_features(schrodr-note-render PRIVATE cxx_std_20)
 target_include_directories(schrodr-note-render PRIVATE src tests)
 target_link_libraries(schrodr-note-render PRIVATE schrodr_core)
 schrodr_warnings(schrodr-note-render)
+
+# Plays a record gate phrase with parameters changed and measures it as the gate does; a tuning tool.
+add_executable(schrodr-record-gate-try tools/record_gate_try.cpp)
+target_compile_features(schrodr-record-gate-try PRIVATE cxx_std_20)
+target_include_directories(schrodr-record-gate-try PRIVATE src tests)
+target_link_libraries(schrodr-record-gate-try PRIVATE schrodr_core)
+schrodr_warnings(schrodr-record-gate-try)
 
 # Measures the reference recordings (fetched by tools/fetch_references.py) and writes their
 # numbers into tests/reference_data.hpp; a review tool, not a test.

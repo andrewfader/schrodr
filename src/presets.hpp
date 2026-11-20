@@ -108,6 +108,14 @@ inline const std::vector<Preset>& all() {
       {"Fiddle, front porch", {{kInstrument, kViolin}, {kBowForce, 0.8}, {kBowSpeed, 0.45}, {kVibrato, 0}, {kRoomSize, 2}, {kRoomAbsorption, 0.15}, {kMicDistance, 1.0}, {kMasterDb, -9.2}}},
       {"Viola, baroque", {{kInstrument, kViola}, {kPitchA4, 415}, {kTemperament, 5}, {kBowForce, 0.5}, {kVibrato, 3}, {kRoomSize, 4}, {kMicDistance, 2.5}, {kMasterDb, -8.0}}},
       {"Cello, baroque", {{kInstrument, kCello}, {kPitchA4, 415}, {kTemperament, 5}, {kBowForce, 1.2}, {kBowSpeed, 0.25}, {kVibrato, 3}, {kRoomSize, 4}, {kMicDistance, 2.5}, {kMasterDb, -17.6}}},
+      // --- on tape: heard through the recording machine after the microphones, measured against the
+      //     piano and other stems of lo-fi home records (tests/record_gate_tests.cpp). A four-track
+      //     cassette: one cardioid close to the piano in a bedroom, near-mono, the top end gone and the
+      //     transport worn; a home studio's tape: a pair in a small studio, warmer, a little wider, still
+      //     wobbling --------------------------------------------------------------------------------
+      {"Upright, four-track cassette", {{kInstrument, kUpright}, {kUnisonSpread, 5}, {kHammerHardness, 0.7}, {kStereoWidth, 0}, {kRoomSize, 2}, {kRoomAbsorption, 0.5}, {kMicDistance, 0.4}, {kMicPattern, 1}, {kWowFlutter, 18}, {kTapeBandwidth, 4500}, {kMasterDb, -9.1}}},
+      {"Upright, home studio tape", {{kInstrument, kUpright}, {kUnisonSpread, 3}, {kHammerHardness, 0.5}, {kRoomSize, 3}, {kRoomAbsorption, 0.35}, {kMicDistance, 1.0}, {kWowFlutter, 15}, {kTapeBandwidth, 8000}, {kMasterDb, -9.8}}},
+      {"Celesta, home studio tape", {{kInstrument, kCelesta}, {kHammerHardness, 1.0}, {kRoomSize, 3}, {kRoomAbsorption, 0.5}, {kMicDistance, 1.0}, {kWowFlutter, 15}, {kTapeBandwidth, 8000}, {kMasterDb, -14.2}}},
   };
   return table;
 }
