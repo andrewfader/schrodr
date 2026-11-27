@@ -125,6 +125,10 @@ regenerate the records' numbers, and `tools/coverage.py` reports line coverage f
     tools/                preset_audit.cpp, note_render.cpp, ui_preview.cpp, record_gate_try.cpp, coverage.py
     features/             Gherkin scenarios mapped to tests
 
+## See also
+
+The sibling CLAP instruments: [FUZZBOI](https://github.com/andrewfader/fuzzboi) (psychedelic sound machine), [BONKR](https://github.com/andrewfader/bonkr) (drums and percussion from their physics) and [HONKR](https://github.com/andrewfader/honkr) (wind instruments from their physics).
+
 ## Licence
 
 See [LICENSE](LICENSE) (source-available) and [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)
