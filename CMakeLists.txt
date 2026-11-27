@@ -3,6 +3,9 @@ project(SCHRODR VERSION 0.3.1 LANGUAGES CXX)
 
 # Keep windows.h from defining the min/max macros no matter which header pulls it in.
 add_compile_definitions($<$<CXX_COMPILER_ID:MSVC>:NOMINMAX>)
+# No fused multiply-adds: clang contracts a*b+c by default on arm64, and the bowed strings'
+# stick-slip is sensitive enough to rounding that the cello played differently on Apple Silicon.
+add_compile_options($<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-ffp-contract=off>)
 # The tests and tools hold whole keyboards and engines (0.4 to 0.5 MB each) on the stack, as
 # Linux's and macOS's 8 MB stacks allow; Windows gives an executable 1 MB, so its programs get
 # 16 MB. The plug-in keeps its engine on the heap and is unaffected.
